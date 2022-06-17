@@ -11,3 +11,6 @@ configuration:
     name: "MQTT Wachtwoord"    
   use_metric:
     name: "Metrisch systeem gebruiken"        
+  interval:
+    name: "Interval"
+    description: "Interval in seconden: Aantal seconden tussen het opvragen van gegevens."    

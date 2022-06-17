@@ -6,6 +6,9 @@ configuration:
   mqtt_user:
     name: "MQTT User"
   mqtt_pass:
-    name: "MQTT Password"    
+    name: "MQTT Password"
   use_metric:
-    name: "Use Metric system"        
+    name: "Use Metric system"
+  interval:
+    name: "Interval"
+    description: "Interval in seconds: Seconds between each data retrieval."        

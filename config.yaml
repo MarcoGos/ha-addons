@@ -1,6 +1,6 @@
 name: "Vantage Pro Weather to MQTT"
 description: "Vantage Pro Weather to MQTT gateway. Based on vproweather."
-version: "1.0.2"
+version: "1.0.3"
 slug: "vproweather2mqtt"
 #apparmor: false
 init: false
@@ -15,6 +15,7 @@ options:
   mqtt_user: ""
   mqtt_pass: ""
   use_metric: true
+  interval: 5
 schema:
   device: device(subsystem=tty)
   mqtt_host: "str"
@@ -22,6 +23,7 @@ schema:
   mqtt_user: "str?"
   mqtt_pass: "str?"
   use_metric: "bool"
+  interval: "int?"
 init: false
 privileged:
   - SYS_RAWIO

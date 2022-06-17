@@ -25,11 +25,12 @@ port = int(os.environ['MQTT_PORT']) if 'MQTT_PORT' in os.environ else 1883
 mqtt_user = os.environ['MQTT_USER'] if 'MQTT_USER' in os.environ else ""
 mqtt_pass = os.environ['MQTT_PASS'] if 'MQTT_PASS' in os.environ else ""
 use_metric = bool(os.environ['USE_METRIC']) if 'USE_METRIC' in os.environ else True
-hass_configured = os.environ['HASS_CONFIGURED'] if 'HASS_CONFIGURED' in os.environ else "" # "done"
+interval = int(os.environ['INTERVAL']) if 'INTERVAL' in os.environ else 5
 
 json_data = {}
 static_topic = 'homeassistant'
 base_topic =  static_topic + '/sensor/vproweather'
+hass_configured = False
 
 def convert_to_celcius(value):
     return round((value - 32.0) * (5.0/9.0), 1) if use_metric else value
@@ -74,26 +75,15 @@ def convert_ms_to_bft(windspeed):
     else:
         return 12
 
-def check_if_correct_data():
+def check_if_correct_data(json_data):
     return json_data['OutsideTemp']['value'] < 60 \
         and json_data['RainRate']['value'] < 1000 \
         and json_data['WindSpeed']['value'] < 40 \
         and json_data['OutsideHum']['value'] < 100
 
-#
-# MAIN
-#
-while True:
-    logging.info('Acquiring data from ' + device + ' using vproweather')
-    logging.debug('Executing /vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
-    output = os.popen('/vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
-    data = output.read()
-    if output.close() == 'None':
-        logging.error('Error acquiring data')
-        exit(2)
-
-    data_lines = data.split('\n')
-
+def convert_raw_data_to_json(raw_data):
+    data_lines = raw_data.split('\n')
+    json_data = {}
     for line in data_lines:
         try:
             key,value = line.split(' = ', 1)
@@ -121,56 +111,76 @@ while True:
                 json_data[key] = value
         except ValueError as e:
             pass
+    return json_data
 
-    if use_metric and 'WindAvgSpeed' in json_data:
-        json_data['WindSpeedBft'] = { 'value': convert_ms_to_bft(convert_kmh_to_ms(float(json_data['WindAvgSpeed']['value']))), 'unit_of_measure': 'Bft' }
+def send_config_to_mqtt(client, json_data):
+    for key, raw_value in json_data.items():
+        device_class = '' 
+        unit_of_measure = ''
+        if type(raw_value) is dict:
+            unit_of_measure = raw_value['unit_of_measure']
+            if 'device_class' in raw_value:
+                device_class = raw_value['device_class']
+        config_payload = {}
+        config_payload["~"] = base_topic + '/' + key
+        config_payload["name"] = "vproweather " + key 
+        config_payload["stat_t"] = "~/state"
+        config_payload["uniq_id"] = "sensor.vproweather_" + key 
+        if unit_of_measure:
+            config_payload["unit_of_meas"] = unit_of_measure
+        if device_class:
+            config_payload["dev_cla"] = device_class
+        client.publish(config_payload["~"] + '/config', json.dumps(config_payload), retain=True)
 
-    if not check_if_correct_data():
-        logging.error('Incorrect data found:' + json.dumps(json_data))
-        exit(2)
-
-    #logging.info("Establishing MQTT to "+broker+" port "+str(port)+"...")
-    client = mqtt.Client()
-
-    if mqtt_user and mqtt_pass:
-    #    print("(Using MQTT username " + mqtt_user + ")")
-        client.username_pw_set(mqtt_user, mqtt_pass)
-
-    try:
-        client.connect(broker, port)
-    except:
-        logging.error("Connection failed. Make sure broker, port, and user is defined correctly")
-        exit(1)
-
-    if hass_configured != 'done':
-        logging.info('Initializing sensors from Home Assistant to auto discover.')
-        for key, raw_value in json_data.items():
-            device_class = '' 
-            unit_of_measure = ''
-            value = raw_value
-            if type(raw_value) is dict:
-                value = raw_value['value']
-                unit_of_measure = raw_value['unit_of_measure']
-                if 'device_class' in raw_value:
-                    device_class = raw_value['device_class']
-            config_payload = {}
-            config_payload["~"] = base_topic + '/' + key
-            config_payload["name"] = "vproweather " + key 
-            config_payload["stat_t"] = "~/state"
-            config_payload["uniq_id"] = "sensor.vproweather_" + key 
-            if unit_of_measure:
-                config_payload["unit_of_meas"] = unit_of_measure
-            if device_class:
-                config_payload["dev_cla"] = device_class
-            client.publish(config_payload["~"] + '/config', json.dumps(config_payload), retain=True)
-
+def send_data_to_mqtt(client, json_data):
     for key, raw_value in json_data.items():
         value = raw_value
         if type(raw_value) is dict:
             value = raw_value['value']
         client.publish(base_topic + '/' + key + '/state', value, retain=True)
-    logging.info('Data sent to MQTT')
-    client.disconnect()
-    #print('published to mqtt')
 
-    time.sleep(5)
+#
+# MAIN
+#
+client = mqtt.Client()
+
+if mqtt_user and mqtt_pass:
+    client.username_pw_set(mqtt_user, mqtt_pass)
+
+try:
+    client.connect(broker, port)
+except:
+    logging.error("Connection failed. Make sure broker, port, and user is defined correctly")
+    exit(1)
+
+while True:
+    ready_to_send = True
+    logging.info('Acquiring data from ' + device + ' using vproweather')
+    logging.debug('Executing /vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
+    output = os.popen('/vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
+    data = output.read()
+    output.close()
+    if data == '':
+        logging.error('Error acquiring data')
+        client.disconnect()
+        exit(2)
+
+    json_data = convert_raw_data_to_json(data)
+
+    if use_metric and 'WindAvgSpeed' in json_data:
+        json_data['WindSpeedBft'] = { 'value': convert_ms_to_bft(convert_kmh_to_ms(float(json_data['WindAvgSpeed']['value']))), 'unit_of_measure': 'Bft' }
+
+    if not check_if_correct_data(json_data):
+        logging.error('Incorrect data found:' + json.dumps(json_data))
+        ready_to_send = False
+
+    if ready_to_send:
+        if not hass_configured:
+            logging.info('Initializing sensors from Home Assistant to auto discover.')
+            send_config_to_mqtt(client, json_data)
+            hass_configured = True
+
+        send_data_to_mqtt(client, json_data)
+        logging.info('Data sent to MQTT')
+
+    time.sleep(interval)
