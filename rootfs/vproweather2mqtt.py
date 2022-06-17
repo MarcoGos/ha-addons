@@ -83,16 +83,6 @@ def check_if_correct_data():
 #
 # MAIN
 #
-# try:
-#     opts, args = getopt.getopt(sys.argv[1:], 'd:', ['data='])
-# except getopt.GetoptError:
-#     logging.error('vproweather2mqtt.py -d <data>')
-#     sys.exit(2)
-
-# for opt, arg in opts:
-#     if opt in ('-d', '--data'):
-#         data = arg
-
 while True:
     logging.info('Acquiring data from ' + device + ' using vproweather')
     logging.debug('Executing /vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
