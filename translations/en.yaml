@@ -1,0 +1,13 @@
+configuration:
+  device:
+    name: "Device"
+  mqtt_host:
+    name: "MQTT Host"
+  mqtt_port:
+    name: "MQTT Port"
+  mqtt_user:
+    name: "MQTT User"
+  mqtt_pass:
+    name: "MQTT Password"    
+  use_metric:
+    name: "Use Metric system"        
