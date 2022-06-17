@@ -1,6 +1,4 @@
 configuration:
-  device:
-    name: "Device"
   mqtt_host:
     name: "MQTT Host"
   mqtt_port:

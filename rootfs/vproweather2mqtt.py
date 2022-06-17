@@ -4,46 +4,44 @@ import getopt
 import sys
 import os
 import paho.mqtt.client as mqtt 
+import logging
+import time
+
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%H:%M:%S') 
 
 try:
-     broker = os.environ['MQTTBROKER']
+    broker = os.environ['MQTT_BROKER']
 except:
-    print("Must define MQTT Broker in configuration!")
+    logging.error("Must define MQTT Broker in configuration!")
     exit(1)
 
-port = int(os.environ['MQTTPORT']) if 'MQTTPORT' in os.environ else 1883
-mqttuser = os.environ['MQTTUSER'] if 'MQTTUSER' in os.environ else ""
-mqttpass = os.environ['MQTTPASS'] if 'MQTTPASS' in os.environ else ""
-hass_configured = os.environ['HASS_CONFIGURED'] if 'HASS_CONFIGURED' in os.environ else "" # "done" or ""
+try:
+    device = os.environ['DEVICE']
+except:
+    logging.error("Must define DEVICE in configuration!")
+    exit(1)
+
+port = int(os.environ['MQTT_PORT']) if 'MQTT_PORT' in os.environ else 1883
+mqtt_user = os.environ['MQTT_USER'] if 'MQTT_USER' in os.environ else ""
+mqtt_pass = os.environ['MQTT_PASS'] if 'MQTT_PASS' in os.environ else ""
+use_metric = bool(os.environ['USE_METRIC']) if 'USE_METRIC' in os.environ else True
+hass_configured = os.environ['HASS_CONFIGURED'] if 'HASS_CONFIGURED' in os.environ else "" # "done"
 
 json_data = {}
-
-metric = True
 static_topic = 'homeassistant'
 base_topic =  static_topic + '/sensor/vproweather'
 
-try:
-    opts, args = getopt.getopt(sys.argv[1:], 'd:', ['data='])
-except getopt.GetoptError:
-    print('vproweather2mqtt.py -d <data>')
-    sys.exit(2)
-
-for opt, arg in opts:
-    if opt in ('-d', '--data'):
-        data = arg
-
-data_lines = data.split('\n')
 def convert_to_celcius(value):
-    return round((value - 32.0) * (5.0/9.0), 1) if metric else value
+    return round((value - 32.0) * (5.0/9.0), 1) if use_metric else value
     
 def convert_to_kmh(value):
-    return round(value * 1.609344, 1) if metric else value
+    return round(value * 1.609344, 1) if use_metric else value
 
 def convert_to_mbar(value):
-    return round(value * 33.8637526, 1) if metric else value
+    return round(value * 33.8637526, 1) if use_metric else value
 
 def convert_to_mm(value):
-    return round(value * 25.4, 1) if metric else value
+    return round(value * 25.4, 1) if use_metric else value
 
 def convert_kmh_to_ms(windspeed):
     return round(windspeed / 3.6, 1)
@@ -76,79 +74,113 @@ def convert_ms_to_bft(windspeed):
     else:
         return 12
 
-for line in data_lines:
-    try:
-        key,value = line.split(' = ', 1)
-        key = key.lstrip('rt')
-        value = value.strip()
+def check_if_correct_data():
+    return json_data['OutsideTemp']['value'] < 60 \
+        and json_data['RainRate']['value'] < 1000 \
+        and json_data['WindSpeed']['value'] < 40 \
+        and json_data['OutsideHum']['value'] < 100
+
+#
+# MAIN
+#
+# try:
+#     opts, args = getopt.getopt(sys.argv[1:], 'd:', ['data='])
+# except getopt.GetoptError:
+#     logging.error('vproweather2mqtt.py -d <data>')
+#     sys.exit(2)
+
+# for opt, arg in opts:
+#     if opt in ('-d', '--data'):
+#         data = arg
+
+while True:
+    logging.info('Acquiring data from ' + device + ' using vproweather')
+    logging.debug('Executing /vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
+    output = os.popen('/vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
+    data = output.read()
+    if output.close() == 'None':
+        logging.error('Error acquiring data')
+        exit(2)
+
+    data_lines = data.split('\n')
+
+    for line in data_lines:
         try:
-            fvalue = float(value)
-            if (key in ['InsideTemp', 'OutsideTemp', 'HeatIndex', 'WindChill']):
-                json_data[key] = { 'value': convert_to_celcius(fvalue), 'unit_of_measure': '°C' if metric else '°F', 'device_class': 'temperature' }
-            elif (key in ['BaroCurr']):
-                json_data[key] = { 'value': convert_to_mbar(fvalue), 'unit_of_measure': 'hPa' if metric else "inHg", 'device_class': 'pressure' }
-            elif (key in ['RainStorm', 'DayRain', 'MonthRain', 'YearRain', 'DayET', 'MonthET', '15mRain', 'HourRain']):
-                json_data[key] = { 'value': convert_to_mm(fvalue), 'unit_of_measure': 'mm' if metric else "inch" }
-            elif (key in ['RainRate']):
-                json_data[key] = { 'value': convert_to_mm(fvalue), 'unit_of_measure': 'mm/h' if metric else "inch/h" }
-            elif (key in ['WindSpeed', 'WindAvgSpeed', 'Wind2mAvgSpeed', 'Wind10mGustMaxSpeed']):
-                json_data[key] = { 'value': convert_to_kmh(fvalue), 'unit_of_measure': 'km/h' if metric else "mph" }
-            elif (key in ['InsideHum', 'OutsideHum']):
-                json_data[key] = { 'value': value, 'unit_of_measure': '%', 'device_class': 'humidity' }
-            elif (key in ['rtBattVoltage']):
-                json_data[key] = { 'value': fvalue, 'unit_of_measure': 'V', 'device_class': 'voltage'}
-            else:
-                json_data[key] = fvalue
-        except:
-            json_data[key] = value
-    except ValueError as e:
-        pass
+            key,value = line.split(' = ', 1)
+            key = key.lstrip('rt')
+            value = value.strip()
+            try:
+                fvalue = float(value)
+                if (key in ['InsideTemp', 'OutsideTemp', 'HeatIndex', 'WindChill']):
+                    json_data[key] = { 'value': convert_to_celcius(fvalue), 'unit_of_measure': '°C' if use_metric else '°F', 'device_class': 'temperature' }
+                elif (key in ['BaroCurr']):
+                    json_data[key] = { 'value': convert_to_mbar(fvalue), 'unit_of_measure': 'hPa' if use_metric else "inHg", 'device_class': 'pressure' }
+                elif (key in ['RainStorm', 'DayRain', 'MonthRain', 'YearRain', 'DayET', 'MonthET', '15mRain', 'HourRain']):
+                    json_data[key] = { 'value': convert_to_mm(fvalue), 'unit_of_measure': 'mm' if use_metric else "inch" }
+                elif (key in ['RainRate']):
+                    json_data[key] = { 'value': convert_to_mm(fvalue), 'unit_of_measure': 'mm/h' if use_metric else "inch/h" }
+                elif (key in ['WindSpeed', 'WindAvgSpeed', 'Wind2mAvgSpeed', 'Wind10mGustMaxSpeed']):
+                    json_data[key] = { 'value': convert_to_kmh(fvalue), 'unit_of_measure': 'km/h' if use_metric else "mph" }
+                elif (key in ['InsideHum', 'OutsideHum']):
+                    json_data[key] = { 'value': fvalue, 'unit_of_measure': '%', 'device_class': 'humidity' }
+                elif (key in ['rtBattVoltage']):
+                    json_data[key] = { 'value': fvalue, 'unit_of_measure': 'V', 'device_class': 'voltage'}
+                else:
+                    json_data[key] = fvalue
+            except:
+                json_data[key] = value
+        except ValueError as e:
+            pass
 
-if metric:
-    json_data['WindSpeedBft'] = { 'value': convert_ms_to_bft(convert_kmh_to_ms(float(json_data['WindAvgSpeed']['value']))), 'unit_of_measure': 'Bft' }
+    if use_metric and 'WindAvgSpeed' in json_data:
+        json_data['WindSpeedBft'] = { 'value': convert_ms_to_bft(convert_kmh_to_ms(float(json_data['WindAvgSpeed']['value']))), 'unit_of_measure': 'Bft' }
 
-print("Establishing MQTT to "+broker+" port "+str(port)+"...")
-client = mqtt.Client()
+    if not check_if_correct_data():
+        logging.error('Incorrect data found:' + json.dumps(json_data))
+        exit(2)
 
-if mqttuser and mqttpass:
-    print("(Using MQTT username " + mqttuser + ")")
-    client.username_pw_set(mqttuser, mqttpass)
+    #logging.info("Establishing MQTT to "+broker+" port "+str(port)+"...")
+    client = mqtt.Client()
 
-try:
-    client.connect(broker, port)
-except:
-    print("Connection failed. Make sure broker, port, and user is defined correctly")
-    exit(1)
+    if mqtt_user and mqtt_pass:
+    #    print("(Using MQTT username " + mqtt_user + ")")
+        client.username_pw_set(mqtt_user, mqtt_pass)
 
-if hass_configured != 'done':
-    print('Sending config payload to home assistant')
+    try:
+        client.connect(broker, port)
+    except:
+        logging.error("Connection failed. Make sure broker, port, and user is defined correctly")
+        exit(1)
+
+    if hass_configured != 'done':
+        logging.info('Initializing sensors from Home Assistant to auto discover.')
+        for key, raw_value in json_data.items():
+            device_class = '' 
+            unit_of_measure = ''
+            value = raw_value
+            if type(raw_value) is dict:
+                value = raw_value['value']
+                unit_of_measure = raw_value['unit_of_measure']
+                if 'device_class' in raw_value:
+                    device_class = raw_value['device_class']
+            config_payload = {}
+            config_payload["~"] = base_topic + '/' + key
+            config_payload["name"] = "vproweather " + key 
+            config_payload["stat_t"] = "~/state"
+            config_payload["uniq_id"] = "sensor.vproweather_" + key 
+            if unit_of_measure:
+                config_payload["unit_of_meas"] = unit_of_measure
+            if device_class:
+                config_payload["dev_cla"] = device_class
+            client.publish(config_payload["~"] + '/config', json.dumps(config_payload), retain=True)
+
     for key, raw_value in json_data.items():
-        device_class = '' 
-        unit_of_measure = ''
         value = raw_value
         if type(raw_value) is dict:
             value = raw_value['value']
-            unit_of_measure = raw_value['unit_of_measure']
-            if 'device_class' in raw_value:
-                device_class = raw_value['device_class']
-        config_payload = {}
-        config_payload["~"] = base_topic + '/' + key
-        config_payload["name"] = "vproweather " + key 
-        config_payload["stat_t"] = "~/state"
-        config_payload["uniq_id"] = "sensor.vproweather_" + key 
-        if unit_of_measure:
-            config_payload["unit_of_meas"] = unit_of_measure
-        if device_class:
-            config_payload["dev_cla"] = device_class
-        client.publish(config_payload["~"] + '/config', json.dumps(config_payload), retain=True)
+        client.publish(base_topic + '/' + key + '/state', value, retain=True)
+    logging.info('Data sent to MQTT')
+    client.disconnect()
+    #print('published to mqtt')
 
-for key, raw_value in json_data.items():
-    value = raw_value
-    if type(raw_value) is dict:
-        value = raw_value['value']
-    client.publish(base_topic + '/' + key + '/state', value, retain=True)
-
-os.environ["HASS_CONFIGURED"] = 'done'
-
-client.disconnect()
-print('published to mqtt')
+    time.sleep(5)

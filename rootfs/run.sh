@@ -1,18 +1,10 @@
 #!/usr/bin/with-contenv bashio
 
 export DEVICE=$(bashio::config 'device')
-export MQTTBROKER=$(bashio::config "mqtt_host")
-export MQTTPORT=$(bashio::config "mqtt_port")
-export MQTTUSER=$(bashio::config "mqtt_user")
-export MQTTPASS=$(bashio::config "mqtt_pass")
+export MQTT_BROKER=$(bashio::config "mqtt_host")
+export MQTT_PORT=$(bashio::config "mqtt_port")
+export MQTT_USER=$(bashio::config "mqtt_user")
+export MQTT_PASS=$(bashio::config "mqtt_pass")
+export USE_METRIC=$(bashio::config "use_metric")
 
-while true
-do
-  {
-    DATA=`/vproweather/vproweather -x -t -d 15 $DEVICE`
-  } || {
-    echo "Gotten an error"
-  }
-  echo `python3 -u ./vproweather2mqtt.py -d "$DATA"`
-  sleep 5
-done
+python3 -u ./vproweather2mqtt.py

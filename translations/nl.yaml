@@ -1,0 +1,13 @@
+configuration:
+  device:
+    name: "Apparaat"
+  mqtt_host:
+    name: "MQTT Server"
+  mqtt_port:
+    name: "MQTT Poort"
+  mqtt_user:
+    name: "MQTT Gebruiker"
+  mqtt_pass:
+    name: "MQTT Wachtwoord"    
+  use_metric:
+    name: "Metrisch systeem gebruiken"        
