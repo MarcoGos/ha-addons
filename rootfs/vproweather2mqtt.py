@@ -91,7 +91,10 @@ def convert_raw_data_to_json(raw_data):
             value = value.strip()
             try:
                 fvalue = float(value)
-                if (key in ['InsideTemp', 'OutsideTemp', 'HeatIndex', 'WindChill']):
+                if (key in ['InsideTemp', 'OutsideTemp', 'HeatIndex', 'WindChill'] 
+                    or key.startswith('ExtraTemp')
+                    or key.startswith('SoilTemp')
+                    or key.startswith('LeafTemp')):
                     json_data[key] = { 
                         'value': convert_to_celcius(fvalue), 
                         'unit_of_measure': '°C' if use_metric else '°F', 
@@ -116,7 +119,7 @@ def convert_raw_data_to_json(raw_data):
                         'value': convert_to_kmh(fvalue), 
                         'unit_of_measure': 'km/h' if use_metric else "mph",
                         'icon': 'mdi:weather-windy' }
-                elif (key in ['InsideHum', 'OutsideHum']):
+                elif (key in ['InsideHum', 'OutsideHum'] or key.startswith('ExtraHum')):
                     json_data[key] = { 
                         'value': fvalue, 'unit_of_measure': '%', 
                         'device_class': 'humidity' }

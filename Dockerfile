@@ -1,9 +1,8 @@
-ARG BUILD_FROM=hassioaddons/base:8.0.6
+ARG BUILD_FROM
 FROM $BUILD_FROM
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-#ARG BUILD_ARCH
 RUN \
   apk add --no-cache \
     git \
@@ -12,7 +11,7 @@ RUN \
     python3 \
     py3-pip \
   && pip3 install paho-mqtt \
-  && git clone https://github.com/bytesnz/vproweather.git \
+  && git clone https://github.com/MarcoGos/vproweather.git \
   && cd vproweather \
   && make all
 

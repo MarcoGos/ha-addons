@@ -2,7 +2,19 @@
 
 ![Supports aarch64 Architecture][aarch64-shield] ![Supports amd64 Architecture][amd64-shield] ![Supports armhf Architecture][armhf-shield] ![Supports armv7 Architecture][armv7-shield] ![Supports i386 Architecture][i386-shield]
 
-Acquiring data from Vantage Pro 2 weather station using a Davis 6510SER. (A Davis 6510USB should work but is not testing. Please leave a note if it does.)
+Acquiring data from a Davis Vantage weather station using the serial connection. Only tested with the Vantage Pro 2 combined with a Davis 6510SER serial port data logger. Other models unsure. Please leave a note if model is working.
+
+## The following models should work:
+
+- Wizard III
+- Wizard II
+- Monitor
+- Perception
+- GroWeather
+- Energy Environmonitor
+- Health Environmonitor
+- Vantage Pro
+- Weather Envoy
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
