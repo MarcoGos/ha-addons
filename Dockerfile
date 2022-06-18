@@ -18,8 +18,7 @@ RUN \
 
 COPY rootfs /
 
-WORKDIR \
-  /
+WORKDIR /
 
 # Copy data for add-on
 RUN chmod a+x /run.sh

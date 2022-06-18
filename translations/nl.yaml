@@ -3,6 +3,7 @@ configuration:
     name: "Apparaat"
   mqtt_host:
     name: "MQTT Server"
+    description: "Er wordt gebruik gemaakt van MQTT autodiscovery. Als dat niet mogelijk is dan kan hier de MQTT server gegevens ingevuld worden."
   mqtt_port:
     name: "MQTT Poort"
   mqtt_user:

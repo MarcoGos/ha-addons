@@ -92,19 +92,38 @@ def convert_raw_data_to_json(raw_data):
             try:
                 fvalue = float(value)
                 if (key in ['InsideTemp', 'OutsideTemp', 'HeatIndex', 'WindChill']):
-                    json_data[key] = { 'value': convert_to_celcius(fvalue), 'unit_of_measure': '°C' if use_metric else '°F', 'device_class': 'temperature' }
+                    json_data[key] = { 
+                        'value': convert_to_celcius(fvalue), 
+                        'unit_of_measure': '°C' if use_metric else '°F', 
+                        'device_class': 'temperature' }
                 elif (key in ['BaroCurr']):
-                    json_data[key] = { 'value': convert_to_mbar(fvalue), 'unit_of_measure': 'hPa' if use_metric else "inHg", 'device_class': 'pressure' }
+                    json_data[key] = { 
+                        'value': convert_to_mbar(fvalue), 
+                        'unit_of_measure': 'hPa' if use_metric else "inHg", 
+                        'device_class': 'pressure' }
                 elif (key in ['RainStorm', 'DayRain', 'MonthRain', 'YearRain', 'DayET', 'MonthET', '15mRain', 'HourRain']):
-                    json_data[key] = { 'value': convert_to_mm(fvalue), 'unit_of_measure': 'mm' if use_metric else "inch" }
+                    json_data[key] = { 
+                        'value': convert_to_mm(fvalue), 
+                        'unit_of_measure': 'mm' if use_metric else "inch",
+                        'icon': 'mdi:water' }
                 elif (key in ['RainRate']):
-                    json_data[key] = { 'value': convert_to_mm(fvalue), 'unit_of_measure': 'mm/h' if use_metric else "inch/h" }
+                    json_data[key] = { 
+                        'value': convert_to_mm(fvalue), 
+                        'unit_of_measure': 'mm/h' if use_metric else "inch/h",
+                        'icon': 'mdi:water' }
                 elif (key in ['WindSpeed', 'WindAvgSpeed', 'Wind2mAvgSpeed', 'Wind10mGustMaxSpeed']):
-                    json_data[key] = { 'value': convert_to_kmh(fvalue), 'unit_of_measure': 'km/h' if use_metric else "mph" }
+                    json_data[key] = {
+                        'value': convert_to_kmh(fvalue), 
+                        'unit_of_measure': 'km/h' if use_metric else "mph",
+                        'icon': 'mdi:weather-windy' }
                 elif (key in ['InsideHum', 'OutsideHum']):
-                    json_data[key] = { 'value': fvalue, 'unit_of_measure': '%', 'device_class': 'humidity' }
+                    json_data[key] = { 
+                        'value': fvalue, 'unit_of_measure': '%', 
+                        'device_class': 'humidity' }
                 elif (key in ['rtBattVoltage']):
-                    json_data[key] = { 'value': fvalue, 'unit_of_measure': 'V', 'device_class': 'voltage'}
+                    json_data[key] = { 
+                        'value': fvalue, 'unit_of_measure': 'V',
+                        'device_class': 'voltage'}
                 else:
                     json_data[key] = fvalue
             except:
@@ -117,19 +136,24 @@ def send_config_to_mqtt(client, json_data):
     for key, raw_value in json_data.items():
         device_class = '' 
         unit_of_measure = ''
+        icon = ''
         if type(raw_value) is dict:
             unit_of_measure = raw_value['unit_of_measure']
             if 'device_class' in raw_value:
                 device_class = raw_value['device_class']
+            if 'icon' in raw_value:
+                icon = raw_value['icon']
         config_payload = {}
         config_payload["~"] = base_topic + '/' + key
         config_payload["name"] = "vproweather " + key 
         config_payload["stat_t"] = "~/state"
-        config_payload["uniq_id"] = "sensor.vproweather_" + key 
+        config_payload["uniq_id"] = "sensor.vproweather_" + key.lower() 
         if unit_of_measure:
             config_payload["unit_of_meas"] = unit_of_measure
         if device_class:
             config_payload["dev_cla"] = device_class
+        if icon:
+            config_payload['ic'] = icon
         client.publish(config_payload["~"] + '/config', json.dumps(config_payload), retain=True)
 
 def send_data_to_mqtt(client, json_data):
@@ -150,14 +174,15 @@ if mqtt_user and mqtt_pass:
 try:
     client.connect(broker, port)
 except:
-    logging.error("Connection failed. Make sure broker, port, and user is defined correctly")
+    logging.error("Connection to MQTT failed. Make sure broker, port, and user is defined correctly")
     exit(1)
 
 while True:
     ready_to_send = True
     logging.info('Acquiring data from ' + device + ' using vproweather')
-    logging.debug('Executing /vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
-    output = os.popen('/vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null')
+    process = '/vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null'
+    logging.debug('Executing ' + process)
+    output = os.popen(process)
     data = output.read()
     output.close()
     if data == '':

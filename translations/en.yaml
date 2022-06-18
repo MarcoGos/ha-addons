@@ -1,6 +1,9 @@
 configuration:
+  device:
+    name: "Device"
   mqtt_host:
     name: "MQTT Host"
+    description: "MQTT auto discovery is used. If no MQTT is installed within Home Assistant you can provide the server info here."
   mqtt_port:
     name: "MQTT Port"
   mqtt_user:
