@@ -2,8 +2,9 @@
 
 ## 1.0.2
 
-- Added alternative Heat Index calculation
+- Added alternative Heat Index calculation if not gotten from device
 - Changed names of entities in Home Assistant
+- Fixed solar radiation entity
 
 ## 1.0.1
 

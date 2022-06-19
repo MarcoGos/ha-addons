@@ -177,7 +177,7 @@ def convert_raw_data_to_json(raw_data):
             value = value.strip()
             try:
                 fvalue = float(value)
-                if (key in ['InsideTemp', 'OutsideTemp', 'WindChill'] 
+                if (key in ['InsideTemp', 'OutsideTemp', 'HeatIndex', 'WindChill'] 
                     or key.startswith('ExtraTemp')
                     or key.startswith('SoilTemp')
                     or key.startswith('LeafTemp')):
@@ -216,14 +216,24 @@ def convert_raw_data_to_json(raw_data):
                         'value': fvalue, 
                         'unit_of_measure': 'V',
                         'device_class': 'voltage'}
+                elif (key in ['SolarRad']):
+                    json_data[key] = {
+                        'value': fvalue,
+                        'unit_of_measure': 'W/m2'
+                    }
                 else:
                     json_data[key] = { 'value': fvalue }
 
             except:
                 if (key in ['IsRaining']):
                     json_data[key] = {
-                        'value': value == 'yes',
+                        'value': 'ON' if value == 'yes' else 'OFF',
                         'component': 'binary_sensor'
+                    }
+                elif (key in ['SolarRad']):
+                    json_data[key] = {
+                        'value': value,
+                        'unit_of_measure': 'W/m2'
                     }
                 else:
                     json_data[key] = { 'value': value }
@@ -231,7 +241,7 @@ def convert_raw_data_to_json(raw_data):
             pass
 
     # Overwrite HeatIndex read from Davis
-    if 'OutsideTemp' in json_data and 'OutsideHum' in json_data:
+    if 'OutsideTemp' in json_data and 'OutsideHum' in json_data and not 'HeatIndex' in json_data:
         json_data['HeatIndex'] = { 
             'value': calc_heat_index(json_data['OutsideTemp']['value_F'], json_data['OutsideHum']['value']),
             'unit_of_measure': '°C' if use_metric else '°F', 
