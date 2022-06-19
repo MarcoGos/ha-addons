@@ -4,7 +4,7 @@
 
 Acquiring data from a Davis Vantage weather station using the serial connection. Only tested with the Vantage Pro 2 combined with a Davis 6510SER serial port data logger. Other models unsure. Please leave a note if model is working.
 
-## The following models should work:
+### The following models should work:
 
 - Wizard III
 - Wizard II
@@ -14,7 +14,9 @@ Acquiring data from a Davis Vantage weather station using the serial connection.
 - Energy Environmonitor
 - Health Environmonitor
 - Vantage Pro
+- Vantage Pro 2
 - Weather Envoy
+- Vantage Vue
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
