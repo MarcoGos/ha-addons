@@ -5,6 +5,7 @@
 - Added alternative Heat Index calculation if not gotten from device
 - Changed names of entities in Home Assistant
 - Fixed solar radiation entity
+- Added auto determine Davis weather station model
 
 ## 1.0.1
 

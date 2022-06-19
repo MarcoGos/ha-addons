@@ -45,7 +45,7 @@ long_names = {
     "Forecast": "Forecast",
     "HeatIndex": "Heat Index",
     "HourRain": "Hour Rain",
-    "InsideHum": "Inside Humidify",
+    "InsideHum": "Inside Humidity",
     "InsideTemp": "Inside Temperature",
     "IsRaining": "Is Raining",
     "LeafTemp1": "Leaf Temperature 1",
@@ -84,6 +84,7 @@ long_names = {
 json_data = {}
 static_topic = 'homeassistant'
 prefix = 'vproweather'
+vproweather_path = '/vproweather/vproweather'
 hass_configured = False
 
 def convert_to_celcius(value):
@@ -132,11 +133,12 @@ def convert_ms_to_bft(windspeed):
 def convert_kmh_to_bft(windspeed_kmh):
     return convert_ms_to_bft(convert_kmh_to_ms(windspeed_kmh))
 
-def check_if_correct_data(json_data):
+def contains_correct_data(json_data):
     return json_data['OutsideTemp']['value'] < 60 \
         and json_data['RainRate']['value'] < 1000 \
         and json_data['WindSpeed']['value'] < 40 \
-        and json_data['OutsideHum']['value'] < 100
+        and json_data['OutsideHum']['value'] < 100 \
+        and json_data['WindAvgSpeed']['value'] , 250
 
 def get_long_name(name):
     if name in long_names:
@@ -249,10 +251,13 @@ def convert_raw_data_to_json(raw_data):
         }
 
     if use_metric and 'WindAvgSpeed' in json_data:
-        json_data['WindSpeedBft'] = { 'value': convert_kmh_to_bft(json_data['WindAvgSpeed']['value']), 'unit_of_measure': 'Bft' }
+        json_data['WindSpeedBft'] = { 
+            'value': convert_kmh_to_bft(json_data['WindAvgSpeed']['value']),
+            'unit_of_measure': 'Bft'
+        }
     return json_data
 
-def send_config_to_mqtt(client, json_data):
+def send_config_to_mqtt(client, json_data, model):
     for key, raw_value in json_data.items():
         device_class = '' 
         unit_of_measure = ''
@@ -271,7 +276,12 @@ def send_config_to_mqtt(client, json_data):
         config_payload["name"] = prefix + " " + get_long_name(key) 
         config_payload["stat_t"] = "~/state"
         config_payload["uniq_id"] = "sensor." + prefix + "_" + key.lower()
-        config_payload['dev'] = { "ids": [prefix], "name": prefix, "mf": "Davis", "mdl": "Vantage Pro 2"  }
+        config_payload['dev'] = { 
+            "ids": [prefix], 
+            "name": prefix, 
+            "mf": "Davis" , 
+            "mdl": model
+        }
         if unit_of_measure:
             config_payload["unit_of_meas"] = unit_of_measure
         if device_class:
@@ -288,6 +298,16 @@ def send_data_to_mqtt(client, json_data):
             component = raw_value['component']
         client.publish(static_topic + '/' + component + '/' + prefix + '/' + key + '/state', value, retain=True)
 
+def get_davis_model():
+    proces = vproweather_path + ' -m ' + device + ' 2>/dev/null'
+    output = os.popen(proces)
+    model = output.read()
+    output.close()
+    if model == '':
+        logging.error('Couldn''t determine model')
+        exit(2)
+    return model.lstrip('Model: ').strip('\n')
+
 #
 # MAIN
 #
@@ -302,10 +322,13 @@ except:
     logging.error("Connection to MQTT failed. Make sure broker, port, and user is defined correctly")
     exit(1)
 
+model = get_davis_model()
+logging.info("Found model: " + model)
+
 while True:
     ready_to_send = True
     logging.info('Acquiring data from ' + device + ' using vproweather')
-    process = '/vproweather/vproweather -x -t -d 15 ' + device + ' 2>/dev/null'
+    process = vproweather_path + ' -x -t -d 15 ' + device + ' 2>/dev/null'
     logging.debug('Executing ' + process)
     output = os.popen(process)
     data = output.read()
@@ -317,14 +340,14 @@ while True:
 
     json_data = convert_raw_data_to_json(data)
 
-    if not check_if_correct_data(json_data):
+    if not contains_correct_data(json_data):
         logging.error('Incorrect data found:' + json.dumps(json_data))
         ready_to_send = False
 
     if ready_to_send:
         if not hass_configured:
             logging.info('Initializing sensors from Home Assistant to auto discover.')
-            send_config_to_mqtt(client, json_data)
+            send_config_to_mqtt(client, json_data, model)
             hass_configured = True
 
         send_data_to_mqtt(client, json_data)

@@ -25,3 +25,4 @@ init: false
 uart: true
 services:
   - mqtt:need
+stage: "experimental"
