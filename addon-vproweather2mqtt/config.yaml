@@ -2,7 +2,7 @@ name: Vantage Pro Weather to MQTT
 description: >-
   Vantage Pro Weather to MQTT gateway. Based on vproweather
 url: https://github.com/MarcoGos/homeassistant_vproweather/
-version: "1.0.2"
+version: "1.0.3"
 slug: "vproweather2mqtt"
 arch:
   - aarch64
@@ -17,6 +17,7 @@ schema:
   device: device(subsystem=tty)
   interval: "int"
   use_metric: "bool"
+  new_sensor_used: "bool?"
   mqtt_host: "str?"
   mqtt_port: "int?"
   mqtt_user: "str?"

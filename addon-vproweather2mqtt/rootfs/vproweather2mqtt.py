@@ -23,12 +23,19 @@ mqtt_user = os.environ['MQTT_USER'] if 'MQTT_USER' in os.environ else ""
 mqtt_pass = os.environ['MQTT_PASS'] if 'MQTT_PASS' in os.environ else ""
 use_metric = bool(os.environ['USE_METRIC']) if 'USE_METRIC' in os.environ else True
 interval = int(os.environ['INTERVAL']) if 'INTERVAL' in os.environ else 5
+new_sensor_used = bool(os.environ['NEW_SENSOR_USED']) if 'NEW_SENSOR_USED' in os.environ else False
+
+if new_sensor_used:
+    if use_metric:
+        temp_correction = -0.5
+    else:
+        temp_correction = -0.9
 
 long_names = {
     "15mRain": "15 Minute Rain",
-    "BaroCurr": "Pressure",
-    "BaroTrend": "Barometer Trend",
-    "BaroTrendImg": "Barometer Trend Image",
+    "BaroCurr": "Barometric Pressure",
+    "BaroTrend": "Barometric Trend",
+    "BaroTrendImg": "Barometric Trend Image",
     "BattVoltage": "Battery Voltage",
     "DavisTime": "Davis Time",
     "DayET": "Day ET",
@@ -76,7 +83,7 @@ long_names = {
     "WindDir": "Wind Direction",
     "WindDirRose": "Wind Direction Rose",
     "WindSpeed": "Wind Speed",
-    "WindSpeedBft": "Wind Speed Bft",
+    "WindSpeedBft": "Wind Speed (Bft)",
     "XmitBattt": "Transmit Battery",
     "YearRain": "Year Rain"
 }
@@ -97,7 +104,7 @@ def convert_to_mbar(value):
     return round(value * 33.8637526, 1) if use_metric else value
 
 def convert_to_mm(value):
-    return round(value * 25.4, 1) if use_metric else value
+    return round(value * 20.0, 1) if use_metric else value # Use metric tipping bucket modification
 
 def convert_kmh_to_ms(windspeed):
     return round(windspeed / 3.6, 1)
@@ -169,6 +176,23 @@ def calc_heat_index(temperature_f, humidity):
     else:
         return heat_index
 
+def calc_wind_chill(temperature_f, windspeed):
+    if (windspeed == 0):
+        wind_chill = temperature_f
+    else:
+        wind_chill = \
+            35.74 \
+            + (0.6215 * temperature_f) \
+            - (35.75 * pow(windspeed,0.16)) \
+            + (0.4275 * temperature_f * pow(windspeed, 0.16))
+    if (wind_chill > temperature_f):
+        wind_chill = temperature_f
+
+    if use_metric:
+        return convert_to_celcius(wind_chill)
+    else:
+        return wind_chill
+
 def convert_raw_data_to_json(raw_data):
     data_lines = raw_data.split('\n')
     json_data = {}
@@ -179,46 +203,54 @@ def convert_raw_data_to_json(raw_data):
             value = value.strip()
             try:
                 fvalue = float(value)
-                if (key in ['InsideTemp', 'OutsideTemp', 'HeatIndex', 'WindChill'] 
-                    or key.startswith('ExtraTemp')
-                    or key.startswith('SoilTemp')
-                    or key.startswith('LeafTemp')):
+                if key in ['InsideTemp', 'OutsideTemp'] \
+                    or key.startswith('ExtraTemp') \
+                    or key.startswith('SoilTemp') \
+                    or key.startswith('LeafTemp'):
                     json_data[key] = { 
-                        'value': convert_to_celcius(fvalue),
+                        'value': convert_to_celcius(fvalue) + (temp_correction if key in ['OutsideTemp'] else 0),
                         'value_F': fvalue,
                         'unit_of_measure': '°C' if use_metric else '°F', 
-                        'device_class': 'temperature' }
-                elif (key in ['BaroCurr']):
+                        'device_class': 'temperature'
+                    }
+                elif key in ['BaroCurr']:
                     json_data[key] = { 
                         'value': convert_to_mbar(fvalue), 
                         'unit_of_measure': 'hPa' if use_metric else "inHg", 
-                        'device_class': 'pressure' }
-                elif (key in ['RainStorm', 'DayRain', 'MonthRain', 'YearRain', 'DayET', 'MonthET', '15mRain', 'HourRain']):
+                        'device_class': 'pressure'
+                    }
+                elif key in ['RainStorm', 'DayRain', 'MonthRain', 'YearRain', 'DayET', 'MonthET', 'YearET', '15mRain', 'HourRain']:
                     json_data[key] = { 
                         'value': convert_to_mm(fvalue), 
                         'unit_of_measure': 'mm' if use_metric else "inch",
-                        'icon': 'mdi:water' }
-                elif (key in ['RainRate']):
+                        'icon': 'mdi:water'
+                    }
+                elif key in ['RainRate']:
                     json_data[key] = { 
                         'value': convert_to_mm(fvalue), 
                         'unit_of_measure': 'mm/h' if use_metric else "inch/h",
-                        'icon': 'mdi:water' }
-                elif (key in ['WindSpeed', 'WindAvgSpeed', 'Wind2mAvgSpeed', 'Wind10mGustMaxSpeed']):
+                        'icon': 'mdi:water'
+                    }
+                elif key in ['WindSpeed', 'WindAvgSpeed', 'Wind2mAvgSpeed', 'Wind10mGustMaxSpeed']:
                     json_data[key] = {
                         'value': convert_to_kmh(fvalue), 
+                        'value_mph': fvalue,
                         'unit_of_measure': 'km/h' if use_metric else "mph",
-                        'icon': 'mdi:weather-windy' }
-                elif (key in ['InsideHum', 'OutsideHum'] or key.startswith('ExtraHum')):
+                        'icon': 'mdi:weather-windy'
+                    }
+                elif key in ['InsideHum', 'OutsideHum'] or key.startswith('ExtraHum'):
                     json_data[key] = { 
                         'value': fvalue, 
                         'unit_of_measure': '%', 
-                        'device_class': 'humidity' }
-                elif (key in ['BattVoltage']):
+                        'device_class': 'humidity'
+                    }
+                elif key in ['BattVoltage']:
                     json_data[key] = { 
                         'value': fvalue, 
                         'unit_of_measure': 'V',
-                        'device_class': 'voltage'}
-                elif (key in ['SolarRad']):
+                        'device_class': 'voltage'
+                    }
+                elif key in ['SolarRad']:
                     json_data[key] = {
                         'value': fvalue,
                         'unit_of_measure': 'W/m2'
@@ -227,28 +259,31 @@ def convert_raw_data_to_json(raw_data):
                     json_data[key] = { 'value': fvalue }
 
             except:
-                if (key in ['IsRaining']):
+                if key in ['IsRaining']:
                     json_data[key] = {
                         'value': 'ON' if value == 'yes' else 'OFF',
                         'component': 'binary_sensor'
-                    }
-                elif (key in ['SolarRad']):
-                    json_data[key] = {
-                        'value': value,
-                        'unit_of_measure': 'W/m2'
                     }
                 else:
                     json_data[key] = { 'value': value }
         except ValueError as e:
             pass
 
-    # Overwrite HeatIndex read from Davis
-    if 'OutsideTemp' in json_data and 'OutsideHum' in json_data and not 'HeatIndex' in json_data:
-        json_data['HeatIndex'] = { 
-            'value': calc_heat_index(json_data['OutsideTemp']['value_F'], json_data['OutsideHum']['value']),
-            'unit_of_measure': '°C' if use_metric else '°F', 
-            'device_class': 'temperature'
-        }
+    # Overwrite HeatIndex and WindChill read from Davis
+    if 'OutsideTemp' in json_data:
+        if 'OutsideHum' in json_data:
+            json_data['HeatIndex'] = { 
+                'value': calc_heat_index(json_data['OutsideTemp']['value_F'], json_data['OutsideHum']['value']),
+                'unit_of_measure': '°C' if use_metric else '°F', 
+                'device_class': 'temperature'
+            }
+
+        if 'WindSpeed' in json_data:
+            json_data['WindChill'] = {
+                'value': calc_wind_chill(json_data['OutsideTemp']['value_F'], json_data['WindSpeed']['value']),
+                'unit_of_measure': '°C' if use_metric else '°F', 
+                'device_class': 'temperature'
+            }
 
     if use_metric and 'WindAvgSpeed' in json_data:
         json_data['WindSpeedBft'] = { 
@@ -273,7 +308,7 @@ def send_config_to_mqtt(client, json_data, model):
             component = raw_value['component']
         config_payload = {}
         config_payload["~"] = static_topic + '/' + component + '/' + prefix + '/' + key
-        config_payload["name"] = prefix + " " + get_long_name(key) 
+        config_payload["name"] = get_long_name(key) 
         config_payload["stat_t"] = "~/state"
         config_payload["uniq_id"] = "sensor." + prefix + "_" + key.lower()
         config_payload['dev'] = { 
