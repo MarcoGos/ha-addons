@@ -343,6 +343,12 @@ def get_davis_model():
         exit(2)
     return model.lstrip('Model: ').strip('\n')
 
+def set_davis_time():
+    proces = vproweather_path + ' -s ' + device + ' 2>/dev/null'
+    output = os.popen(proces)
+    output.close()
+    logging.info('Set weather station time to system time')
+
 #
 # MAIN
 #
@@ -359,6 +365,9 @@ except:
 
 model = get_davis_model()
 logging.info("Found model: " + model)
+
+if not hass_configured:
+    set_davis_time()
 
 while True:
     ready_to_send = True
