@@ -6,6 +6,7 @@
 - Replace heat index and wind chill with own calculations
 - Handles temperature correction if new VP2 TH sensor 7346.070 is used on older Vantage Pro 2
 - Added auto setting weather station time to system time
+
 ## 1.0.2
 
 - Added alternative Heat Index calculation if not gotten from device
