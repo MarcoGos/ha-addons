@@ -139,7 +139,7 @@ def contains_correct_data(json_data):
         and json_data['RainRate']['value'] < 1000 \
         and json_data['WindSpeed']['value'] < 40 \
         and json_data['OutsideHum']['value'] < 100 \
-        and json_data['WindAvgSpeed']['value'] , 250
+        and json_data['WindAvgSpeed']['value'] < 250
 
 def get_long_name(name):
     if name in long_names:
