@@ -16,5 +16,5 @@ configuration:
     name: "Interval"
     description: "Interval in seconden: Aantal seconden tussen het opvragen van gegevens."
   new_sensor_used:
-    name: "Nieuwe temperatuur sensor gebruikt in oudere Vantage Pro 2"
-    description: "Indien de nieuwe sensor VP2 TH sensor 7346.070 wordt gebruikt in een oudere Vantage Pro 2. Dit zorgt ervoor dat de temperatuur gecorrigeerd wordt met -0,5°C resp. -0,9°F."     
+    name: "Nieuwe temperatuur sensor"
+    description: "Gebruik deze instelling indien de nieuwe VP2 TH sensor 7346.070 wordt gebruikt in een oudere Vantage Pro 2. Dit zorgt ervoor dat de temperatuur gecorrigeerd wordt met -0,5°C of -0,9°F."     

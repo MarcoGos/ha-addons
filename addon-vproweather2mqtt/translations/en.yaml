@@ -16,5 +16,5 @@ configuration:
     name: "Interval"
     description: "Interval in seconds: Seconds between each data retrieval."   
   new_sensor_used:
-    name: "New temperature sensor used in older Vantage Pro 2"
-    description: "Set to True if new sensor VP2 TH sensor 7346.070 is used on an older Vantage Pro 2. Temperature will be corrected with -0.5°C or -0.9°F."     
+    name: "New temperature sensor"
+    description: "Use this setting if the new VP2 TH sensor 7346.070 is used on an older Vantage Pro 2. Temperature will be corrected with -0.5°C or -0.9°F."     

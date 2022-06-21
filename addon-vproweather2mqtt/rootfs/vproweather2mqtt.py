@@ -25,12 +25,6 @@ use_metric = bool(os.environ['USE_METRIC']) if 'USE_METRIC' in os.environ else T
 interval = int(os.environ['INTERVAL']) if 'INTERVAL' in os.environ else 5
 new_sensor_used = bool(os.environ['NEW_SENSOR_USED']) if 'NEW_SENSOR_USED' in os.environ else False
 
-if new_sensor_used:
-    if use_metric:
-        temp_correction = -0.5
-    else:
-        temp_correction = -0.9
-
 long_names = {
     "15mRain": "15 Minute Rain",
     "BaroCurr": "Barometric Pressure",
@@ -207,8 +201,10 @@ def convert_raw_data_to_json(raw_data):
                     or key.startswith('ExtraTemp') \
                     or key.startswith('SoilTemp') \
                     or key.startswith('LeafTemp'):
+                    if key in ['OutsideTemp']:
+                        fvalue -= 0.9 if new_sensor_used else 0
                     json_data[key] = { 
-                        'value': convert_to_celcius(fvalue) + (temp_correction if key in ['OutsideTemp'] else 0),
+                        'value': convert_to_celcius(fvalue),
                         'value_F': fvalue,
                         'unit_of_measure': '°C' if use_metric else '°F', 
                         'device_class': 'temperature'
@@ -324,6 +320,7 @@ def send_config_to_mqtt(client, json_data, model):
         if icon:
             config_payload['ic'] = icon
         client.publish(config_payload["~"] + '/config', json.dumps(config_payload), retain=True)
+        logging.debug('Sent config for sensor %s', config_payload["~"])
 
 def send_data_to_mqtt(client, json_data):
     for key, raw_value in json_data.items():
