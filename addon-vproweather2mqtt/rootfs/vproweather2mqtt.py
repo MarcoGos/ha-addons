@@ -26,14 +26,14 @@ interval = int(os.environ['INTERVAL']) if 'INTERVAL' in os.environ else 5
 new_sensor_used = bool(os.environ['NEW_SENSOR_USED']) if 'NEW_SENSOR_USED' in os.environ else False
 
 long_names = {
-    "15mRain": "15 Minute Rain",
+    "15mRain": "Rain (15 Minute)",
     "BaroCurr": "Barometric Pressure",
     "BaroTrend": "Barometric Trend",
     "BaroTrendImg": "Barometric Trend Image",
     "BattVoltage": "Battery Voltage",
     "DavisTime": "Davis Time",
     "DayET": "Day ET",
-    "DayRain": "Day Rain",
+    "DayRain": "Rain (Day)",
     "ExtraTemp1": "Extra Temperature 1",
     "ExtraTemp2": "Extra Temperature 2",
     "ExtraTemp3": "Extra Temperature 3",
@@ -45,19 +45,19 @@ long_names = {
     "ForeRule": "Forecast Rule",
     "Forecast": "Forecast",
     "HeatIndex": "Heat Index",
-    "HourRain": "Hour Rain",
-    "InsideHum": "Inside Humidity",
-    "InsideTemp": "Inside Temperature",
+    "HourRain": "Rain (Hour)",
+    "InsideHum": "Humidity (Inside)",
+    "InsideTemp": "Temperature (Inside)",
     "IsRaining": "Is Raining",
     "LeafTemp1": "Leaf Temperature 1",
     "LeafTemp2": "Leaf Temperature 2",
     "LeafTemp3": "Leaf Temperature 3",
     "LeafTemp4": "Leaf Temperature 4",
     "MonthET": "Month ET",
-    "MonthRain": "Month Rain",
+    "MonthRain": "Rain (Month)",
     "NextArchiveRecord": "Next Archive Record",
-    "OutsideHum": "Outside Humidity",
-    "OutsideTemp": "Outside Temperature",
+    "OutsideHum": "Humidity",
+    "OutsideTemp": "Temperature",
     "RainRate": "Rain Rate",
     "RainStorm": "Rain Storm",
     "SoilTemp1": "Soil Temperature 1",
@@ -79,7 +79,7 @@ long_names = {
     "WindSpeed": "Wind Speed",
     "WindSpeedBft": "Wind Speed (Bft)",
     "XmitBattt": "Transmit Battery",
-    "YearRain": "Year Rain"
+    "YearRain": "Rain (Year)"
 }
 
 json_data = {}
@@ -201,8 +201,8 @@ def convert_raw_data_to_json(raw_data):
                     or key.startswith('ExtraTemp') \
                     or key.startswith('SoilTemp') \
                     or key.startswith('LeafTemp'):
-                    if key in ['OutsideTemp']:
-                        fvalue -= 0.9 if new_sensor_used else 0
+                    if key in ['OutsideTemp'] and new_sensor_used:
+                        fvalue -= 0.9
                     json_data[key] = { 
                         'value': convert_to_celcius(fvalue),
                         'value_F': fvalue,
