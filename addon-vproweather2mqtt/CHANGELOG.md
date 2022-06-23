@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+- Added log level configuration option
+- Removed unit of measure of Solar Radiation sensor
+- Removed the Next Archive Record sensor
+
 ## 1.0.3
 
 - Better handle MQTT credential check

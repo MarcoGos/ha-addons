@@ -10,11 +10,14 @@ configuration:
     name: "MQTT Gebruiker"
   mqtt_pass:
     name: "MQTT Wachtwoord"    
-  use_metric:
-    name: "Metrisch systeem gebruiken"        
+  use_system:
+    name: "Imperiale of metrisch stelsel gebruiken."        
   interval:
     name: "Interval"
     description: "Interval in seconden: Aantal seconden tussen het opvragen van gegevens."
   new_sensor_used:
     name: "Nieuwe temperatuur sensor"
-    description: "Gebruik deze instelling indien de nieuwe VP2 TH sensor 7346.070 wordt gebruikt in een oudere Vantage Pro 2. Dit zorgt ervoor dat de temperatuur gecorrigeerd wordt met -0,5°C of -0,9°F."     
+    description: "Gebruik deze instelling indien de nieuwe VP2 TH sensor 7346.070 wordt gebruikt in een oudere Vantage Pro 2. Dit zorgt ervoor dat de temperatuur gecorrigeerd wordt met -0,5°C of -0,9°F."
+  log_level:
+    name: Log niveau
+    description: Beheert het niveau van log details die de add-on genereert.       

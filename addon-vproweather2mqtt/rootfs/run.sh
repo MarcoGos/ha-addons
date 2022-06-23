@@ -1,5 +1,7 @@
 #!/usr/bin/with-contenv bashio
 
+bashio::log.level $(bashio::config "log_level")
+
 if ! bashio::services.available "mqtt" && ! bashio::config.exists 'mqtt_host'; then
     bashio::log.info "No internal MQTT service found and no MQTT server defined, Please install Mosquitto broker or specify your own."
     exit 2
@@ -22,7 +24,8 @@ fi
 
 export DEVICE=$(bashio::config 'device')
 export INTERVAL=$(bashio::config "interval")
-export USE_METRIC=$(bashio::config "use_metric")
 export NEW_SENSOR_USED=$(bashio::config "new_sensor_used")
+export USE_SYSTEM=$(bashio::config "use_system")
+export LOG_LEVEL=$(bashio::config "log_level")
 
 python3 -u ./vproweather2mqtt.py

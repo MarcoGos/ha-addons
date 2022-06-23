@@ -4,7 +4,17 @@ import paho.mqtt.client as mqtt
 import logging
 import time
 
-logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%H:%M:%S') 
+#trace|debug|info|notice|warning|error|fatal
+log_levels = {
+    'debug': logging.DEBUG,
+    'info': logging.INFO,
+    'warning': logging.WARNING,
+    'error': logging.ERROR,
+    'fatal': logging.FATAL
+}
+log_level = (os.environ['LOG_LEVEL']) if 'LOG_LEVEL' in os.environ else 'info'
+
+logging.basicConfig(level=log_levels[log_level], format='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%H:%M:%S') 
 
 try:
     broker = os.environ['MQTT_BROKER']
@@ -21,9 +31,12 @@ except:
 port = int(os.environ['MQTT_PORT']) if 'MQTT_PORT' in os.environ else 1883
 mqtt_user = os.environ['MQTT_USER'] if 'MQTT_USER' in os.environ else ""
 mqtt_pass = os.environ['MQTT_PASS'] if 'MQTT_PASS' in os.environ else ""
-use_metric = bool(os.environ['USE_METRIC']) if 'USE_METRIC' in os.environ else True
+use_system = os.environ['USE_SYSTEM'] if 'USE_SYSTEM' in os.environ else "Metric"
+use_metric = use_system == 'Metric'
 interval = int(os.environ['INTERVAL']) if 'INTERVAL' in os.environ else 5
 new_sensor_used = bool(os.environ['NEW_SENSOR_USED']) if 'NEW_SENSOR_USED' in os.environ else False
+
+logging.info('Use system: %s', use_system)
 
 long_names = {
     "15mRain": "Rain (15 Minute)",
@@ -55,7 +68,6 @@ long_names = {
     "LeafTemp4": "Leaf Temperature 4",
     "MonthET": "Month ET",
     "MonthRain": "Rain (Month)",
-    "NextArchiveRecord": "Next Archive Record",
     "OutsideHum": "Humidity",
     "OutsideTemp": "Temperature",
     "RainRate": "Rain Rate",
@@ -194,6 +206,8 @@ def convert_raw_data_to_json(raw_data):
         try:
             key,value = line.split(' = ', 1)
             key = key.lstrip('rt')
+            if not key in long_names:
+                continue
             value = value.strip()
             try:
                 fvalue = float(value)
@@ -246,13 +260,10 @@ def convert_raw_data_to_json(raw_data):
                         'unit_of_measure': 'V',
                         'device_class': 'voltage'
                     }
-                elif key in ['SolarRad']:
-                    json_data[key] = {
-                        'value': fvalue,
-                        'unit_of_measure': 'W/m2'
-                    }
                 else:
-                    json_data[key] = { 'value': fvalue }
+                    json_data[key] = { 
+                        'value': fvalue
+                    }
 
             except:
                 if key in ['IsRaining']:
