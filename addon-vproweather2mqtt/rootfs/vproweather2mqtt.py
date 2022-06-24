@@ -6,8 +6,10 @@ import time
 
 #trace|debug|info|notice|warning|error|fatal
 log_levels = {
+    'trace': logging.DEBUG,
     'debug': logging.DEBUG,
     'info': logging.INFO,
+    'notice': logging.WARNING,
     'warning': logging.WARNING,
     'error': logging.ERROR,
     'fatal': logging.FATAL
@@ -78,7 +80,7 @@ long_names = {
     "SoilTemp4": "Soil Temperature 4",
     "SolarRad": "Solar Radiation",
     "StormStartDate": "Storm Start Date",
-    "ThswIndex": "THSW Index",
+#    "ThswIndex": "THSW Index",
     "UVLevel": "UV Level",
     "Wind10mGustMaxDir": "Wind 10 minute Gust Max. Direction",
     "Wind10mGustMaxDirRose": "Wind 10 minute Gust Max. Direction Rose",
@@ -90,8 +92,9 @@ long_names = {
     "WindDirRose": "Wind Direction Rose",
     "WindSpeed": "Wind Speed",
     "WindSpeedBft": "Wind Speed (Bft)",
-    "XmitBattt": "Transmit Battery",
-    "YearRain": "Rain (Year)"
+    "XmitBattt": "Transmit Battery Status",
+    "YearRain": "Rain (Year)",
+    "YearET": "Year ET"
 }
 
 json_data = {}
@@ -211,7 +214,7 @@ def convert_raw_data_to_json(raw_data):
             value = value.strip()
             try:
                 fvalue = float(value)
-                if key in ['InsideTemp', 'OutsideTemp'] \
+                if key in ['InsideTemp', 'OutsideTemp', 'ThswIndex'] \
                     or key.startswith('ExtraTemp') \
                     or key.startswith('SoilTemp') \
                     or key.startswith('LeafTemp'):
@@ -259,6 +262,11 @@ def convert_raw_data_to_json(raw_data):
                         'value': fvalue, 
                         'unit_of_measure': 'V',
                         'device_class': 'voltage'
+                    }
+                elif key in ['WindDir', 'Wind10mGustMaxDir']:
+                    json_data[key] = {
+                        'value': fvalue,
+                        'unit_of_measure': '°'
                     }
                 else:
                     json_data[key] = { 

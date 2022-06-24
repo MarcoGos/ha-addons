@@ -19,11 +19,11 @@ schema:
   interval: "int"
   use_system: "list(Imperial|Metric)"
   new_sensor_used: "bool?"
+  log_level: list(trace|debug|info|notice|warning|error|fatal)?
   mqtt_host: "str?"
   mqtt_port: "port?"
   mqtt_user: "str?"
   mqtt_pass: "str?"
-  log_level: list(debug|info|warning|error|fatal)?
 init: false
 uart: true
 services:
