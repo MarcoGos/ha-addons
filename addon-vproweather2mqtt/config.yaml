@@ -18,12 +18,13 @@ schema:
   device: device(subsystem=tty)
   interval: "int"
   use_system: "list(Imperial|Metric)"
-  new_sensor_used: "bool?"
+  new_sensor_used: "bool"
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   mqtt_host: "str?"
   mqtt_port: "port?"
   mqtt_user: "str?"
   mqtt_pass: "str?"
+  discovery_prefix: "str?"
 init: false
 uart: true
 services:

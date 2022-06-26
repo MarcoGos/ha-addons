@@ -19,24 +19,25 @@ log_level = (os.environ['LOG_LEVEL']) if 'LOG_LEVEL' in os.environ else 'info'
 logging.basicConfig(level=log_levels[log_level], format='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%H:%M:%S') 
 
 try:
-    broker = os.environ['MQTT_BROKER']
-except:
-    logging.error("Must define MQTT Broker in configuration!")
-    exit(1)
-
-try:
     device = os.environ['DEVICE']
 except:
     logging.error("Must define DEVICE in configuration!")
     exit(1)
 
-port = int(os.environ['MQTT_PORT']) if 'MQTT_PORT' in os.environ else 1883
-mqtt_user = os.environ['MQTT_USER'] if 'MQTT_USER' in os.environ else ""
-mqtt_pass = os.environ['MQTT_PASS'] if 'MQTT_PASS' in os.environ else ""
-use_system = os.environ['USE_SYSTEM'] if 'USE_SYSTEM' in os.environ else "Metric"
+try:
+    broker = os.environ['MQTT_BROKER']
+except:
+    logging.error("Must define MQTT Broker in configuration!")
+    exit(1)
+
+port = int(os.environ.get('MQTT_PORT', 1883))
+mqtt_user = os.environ.get('MQTT_USER')
+mqtt_pass = os.environ.get('MQTT_PASS')
+discovery_prefix = os.environ.get('DISCOVERY_PREFIX', 'homeassistant')
+use_system = os.environ.get('USE_SYSTEM', 'Metric')
 use_metric = use_system == 'Metric'
-interval = int(os.environ['INTERVAL']) if 'INTERVAL' in os.environ else 5
-new_sensor_used = bool(os.environ['NEW_SENSOR_USED']) if 'NEW_SENSOR_USED' in os.environ else False
+interval = int(os.environ.get('INTERVAL', 5))
+new_sensor_used = bool(os.environ.get('NEW_SENSOR_USED', False))
 
 logging.info('Use system: %s', use_system)
 
@@ -98,7 +99,6 @@ long_names = {
 }
 
 json_data = {}
-static_topic = 'homeassistant'
 prefix = 'vproweather'
 vproweather_path = '/vproweather/vproweather'
 hass_configured = False
@@ -322,7 +322,7 @@ def send_config_to_mqtt(client, json_data, model):
         if 'component' in raw_value:
             component = raw_value['component']
         config_payload = {}
-        config_payload["~"] = static_topic + '/' + component + '/' + prefix + '/' + key
+        config_payload["~"] = "/".join([discovery_prefix, component, prefix, key])
         config_payload["name"] = get_long_name(key) 
         config_payload["stat_t"] = "~/state"
         config_payload["uniq_id"] = "sensor." + prefix + "_" + key.lower()
@@ -347,7 +347,7 @@ def send_data_to_mqtt(client, json_data):
         value = raw_value['value']
         if 'component' in raw_value:
             component = raw_value['component']
-        client.publish(static_topic + '/' + component + '/' + prefix + '/' + key + '/state', value, retain=True)
+        client.publish("/".join([discovery_prefix, component, prefix, key, 'state']), value, retain=True)
 
 def get_davis_model():
     proces = vproweather_path + ' -m ' + device + ' 2>/dev/null'

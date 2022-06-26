@@ -16,16 +16,17 @@ else
     else
         bashio::log.info "MQTT credentials configured, using those ..."
         export MQTT_BROKER=$(bashio::config "mqtt_host")
-        export MQTT_PORT=$(bashio::config "mqtt_port")
+        export MQTT_PORT=$(bashio::config "mqtt_port" 1833)
         export MQTT_USER=$(bashio::config "mqtt_user")
         export MQTT_PASS=$(bashio::config "mqtt_pass")
     fi
 fi
 
 export DEVICE=$(bashio::config 'device')
-export INTERVAL=$(bashio::config "interval")
+export INTERVAL=$(bashio::config "interval" 5)
 export NEW_SENSOR_USED=$(bashio::config "new_sensor_used")
 export USE_SYSTEM=$(bashio::config "use_system")
 export LOG_LEVEL=$(bashio::config "log_level")
+export DISCOVERY_PREFIX=$(bashio::config "discovery_prefix" "homeassistant")
 
 python3 -u ./vproweather2mqtt.py
