@@ -13,7 +13,7 @@ configuration:
   discovery_prefix:
     name: "Discovery Prefix"
     description: "Set the discovery prefix, usually this is 'homeassistant'."
-  use_system:
+  unit_system:
     name: "Use Imperial or Metric system"
   interval:
     name: Interval

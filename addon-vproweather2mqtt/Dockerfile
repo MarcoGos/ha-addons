@@ -11,6 +11,7 @@ RUN \
     python3 \
     py3-pip \
   && pip3 install paho-mqtt \
+  && pip3 install colorlog \
   && git clone https://github.com/MarcoGos/vproweather.git \
   && cd vproweather \
   && make all

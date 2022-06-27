@@ -13,7 +13,7 @@ configuration:
   discovery_prefix:
     name: "Ontdekkingsvoorvoegsel"
     description: "Stel het ontdekkingsvoorvoegsel in, normaal gesproken is dat 'homeassistant'."
-  use_system:
+  unit_system:
     name: "Imperiale of metrisch stelsel gebruiken."        
   interval:
     name: "Interval"
