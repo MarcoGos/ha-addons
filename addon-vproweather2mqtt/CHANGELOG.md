@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.5
+
+- Improved logging (coloured)
+- Improved parameter transfer to python
+- Added Discovery Prefix
+- Removed THSW index due to incorrect value
+- Added Unit of Measure to wind direction
+
 ## 1.0.4
 
 - Added log level configuration option
