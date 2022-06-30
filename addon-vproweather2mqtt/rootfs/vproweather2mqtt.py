@@ -101,7 +101,7 @@ long_names = {
     "BaroTrendImg": "Barometric Trend Image",
     "BattVoltage": "Battery Voltage",
     "DavisTime": "Davis Time",
-    "DayET": "Day ET",
+    "DayET": "Evapotranspiration Total (Day)",
     "DayRain": "Rain (Day)",
     "ExtraTemp1": "Extra Temperature 1",
     "ExtraTemp2": "Extra Temperature 2",
@@ -110,6 +110,7 @@ long_names = {
     "ExtraTemp5": "Extra Temperature 5",
     "ExtraTemp6": "Extra Temperature 6",
     "ExtraTemp7": "Extra Temperature 7",
+    "FeelsLike": "Feels Like",
     "ForeIcon": "Forecast Icon",
     "ForeRule": "Forecast Rule",
     "Forecast": "Forecast",
@@ -122,7 +123,7 @@ long_names = {
     "LeafTemp2": "Leaf Temperature 2",
     "LeafTemp3": "Leaf Temperature 3",
     "LeafTemp4": "Leaf Temperature 4",
-    "MonthET": "Month ET",
+    "MonthET": "Evapotranspiration Total (Month)",
     "MonthRain": "Rain (Month)",
     "OutsideHum": "Humidity",
     "OutsideTemp": "Temperature",
@@ -140,15 +141,15 @@ long_names = {
     "Wind10mGustMaxDirRose": "Wind 10 minute Gust Max. Direction Rose",
     "Wind10mGustMaxSpeed": "Wind 10 minute Gust Max. Speed",
     "Wind2mAvgSpeed": "Wind 2 minute Average Speed",
-    "WindAvgSpeed": "Wind Average Speed",
+    "WindAvgSpeed": "Wind 10 minute Average Speed",
     "WindChill": "Wind Chill",
     "WindDir": "Wind Direction",
     "WindDirRose": "Wind Direction Rose",
     "WindSpeed": "Wind Speed",
     "WindSpeedBft": "Wind Speed (Bft)",
-    "XmitBattt": "Transmit Battery Status",
+#    "XmitBattt": "Transmit Battery Status",
     "YearRain": "Rain (Year)",
-    "YearET": "Year ET"
+    "YearET": "Evapotranspiration Total (Year)"
 }
 
 json_data = {}
@@ -215,11 +216,11 @@ def get_long_name(name: str) -> str:
     else:
         return name
 
-def calc_heat_index(temperature_f: float, humidity: float) -> float:
+def calc_heat_index(temperature_f: float, humidity: float, metric_system: bool = True) -> float:
     if temperature_f < 80.0 or humidity < 40.0:
-        return convert_to_celcius(temperature_f)
+        return convert_to_celcius(temperature_f) if metric_system else temperature_f
     else:
-        heat_index = \
+        heat_index_f = \
             -42.379 \
             + (2.04901523 * temperature_f) \
             + (10.14333127 * humidity) \
@@ -230,30 +231,39 @@ def calc_heat_index(temperature_f: float, humidity: float) -> float:
             + (0.00085282 * temperature_f * pow(humidity, 2)) \
             - (0.00000199 * pow(temperature_f, 2) * pow(humidity, 2))
 
-    if (heat_index < temperature_f):
-        heat_index = temperature_f
+    if (heat_index_f < temperature_f):
+        heat_index_f = temperature_f
 
-    if metric_system:
-        return convert_to_celcius(heat_index)
-    else:
-        return heat_index
+    return convert_to_celcius(heat_index_f) if metric_system else heat_index_f
 
-def calc_wind_chill(temperature_f: float, windspeed: float) -> float:
+def calc_wind_chill(temperature_f: float, windspeed: float, metric_system: bool = True) -> float:
     if (windspeed == 0):
-        wind_chill = temperature_f
+        wind_chill_f = temperature_f
     else:
-        wind_chill = \
+        wind_chill_f = \
             35.74 \
             + (0.6215 * temperature_f) \
             - (35.75 * pow(windspeed,0.16)) \
             + (0.4275 * temperature_f * pow(windspeed, 0.16))
-    if (wind_chill > temperature_f):
-        wind_chill = temperature_f
+    if (wind_chill_f > temperature_f):
+        wind_chill_f = temperature_f
 
     if metric_system:
-        return convert_to_celcius(wind_chill)
+        return convert_to_celcius(wind_chill_f)
     else:
-        return wind_chill
+        return wind_chill_f
+
+def calc_feels_like(windchill_f: float, heatindex_f: float, temperature_f: float, metric_system: bool = True) -> float:
+    if temperature_f <= 61:
+        feels_like_f = windchill_f
+    elif temperature_f >= 70:
+        feels_like_f = heatindex_f
+    else:
+        feels_like_f = temperature_f 
+    if metric_system:
+        return convert_to_celcius(feels_like_f)
+    else:
+        return feels_like_f
 
 def convert_raw_data_to_json(raw_data: str) -> dict:
     data_lines = raw_data.split('\n')
@@ -342,15 +352,26 @@ def convert_raw_data_to_json(raw_data: str) -> dict:
     # Overwrite HeatIndex and WindChill read from Davis
     if 'OutsideTemp' in json_data:
         if 'OutsideHum' in json_data:
+            heat_index_F = calc_heat_index(json_data['OutsideTemp']['value_F'], json_data['OutsideHum']['value'], False)
             json_data['HeatIndex'] = { 
-                'value': calc_heat_index(json_data['OutsideTemp']['value_F'], json_data['OutsideHum']['value']),
+                'value': convert_to_celcius(heat_index_F),
+                'value_F': heat_index_F,
                 'unit_of_measure': '°C' if metric_system else '°F', 
                 'device_class': 'temperature'
             }
 
         if 'WindSpeed' in json_data:
+            wind_chill_F =  calc_wind_chill(json_data['OutsideTemp']['value_F'], json_data['WindSpeed']['value'], False)
             json_data['WindChill'] = {
-                'value': calc_wind_chill(json_data['OutsideTemp']['value_F'], json_data['WindSpeed']['value']),
+                'value': convert_to_celcius(wind_chill_F),
+                'value_F': wind_chill_F,
+                'unit_of_measure': '°C' if metric_system else '°F', 
+                'device_class': 'temperature'
+            }
+
+        if 'WindChill' in json_data and 'HeatIndex' in json_data:
+            json_data['FeelsLike'] = {
+                'value': calc_feels_like(json_data['WindChill']['value_F'], json_data['HeatIndex']['value_F'], json_data['OutsideTemp']['value_F']),
                 'unit_of_measure': '°C' if metric_system else '°F', 
                 'device_class': 'temperature'
             }
