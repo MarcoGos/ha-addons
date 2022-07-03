@@ -118,6 +118,7 @@ def send_config_to_mqtt(client: Any, data: Any) -> None:
         config_payload = {}
         config_payload["~"] = f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}"
         config_payload["name"] = MAPPING[key]['long_name'] 
+        config_payload["uniq_id"] = f"{prefix}_{MAPPING[key]['topic'].lower()}"
         config_payload["stat_t"] = "~/state"
         config_payload['dev'] = { 
             "ids": [prefix], 
@@ -137,6 +138,9 @@ def send_data_to_mqtt(client: Any, data: dict):
     for key, value in data.items():
         if not key in MAPPING:
             continue
+        if 'has_correct_value' in MAPPING[key]:
+            if not MAPPING[key]['has_correct_value'](value):
+                continue
 
         logger.debug(f"{key}={value} (type={type(value)})")
         component = 'sensor'
@@ -156,6 +160,7 @@ def add_additional_info(data: dict):
     data['FeelsLike'] = calc_feels_like(data['WindChill'], data['HeatIndex'], data['TempOut'])
     data['WindDirRose'] = get_wind_rose(data['WindDir'])
     data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
+    data['IsRaining'] = "ON" if data['RainRate'] > 0 else "OFF"
 
 def correct_temperature(data: dict):
     if 'TempOut' in data:

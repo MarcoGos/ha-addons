@@ -13,7 +13,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
-        "long_name": "Temperature",
+        "long_name": "Temperature (Outside)",
         "conversion": convert_to_celcius
     },
     "TempIn": {
@@ -152,6 +152,11 @@ MAPPING = {
         "icon": "mdi:water",
         "long_name": "Rain Rate",
         "conversion": convert_to_mm
+    },
+    "IsRaining": {
+        "topic": "IsRaining",
+        "long_name": "Is Raining",
+        "component": "binary_sensor"
     },
     "UV": {
         "topic": "UVLevel",
