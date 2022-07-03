@@ -95,7 +95,7 @@ if not broker:
 metric_system = unit_system == 'Metric'
 
 long_names = {
-    "15mRain": "Rain (15 Minute)",
+#    "15mRain": "Rain (15 Minute)",
     "BaroCurr": "Barometric Pressure",
     "BaroTrend": "Barometric Trend",
     "BaroTrendImg": "Barometric Trend Image",
@@ -115,7 +115,7 @@ long_names = {
     "ForeRule": "Forecast Rule",
     "Forecast": "Forecast",
     "HeatIndex": "Heat Index",
-    "HourRain": "Rain (Hour)",
+#    "HourRain": "Rain (Hour)",
     "InsideHum": "Humidity (Inside)",
     "InsideTemp": "Temperature (Inside)",
     "IsRaining": "Is Raining",
@@ -168,6 +168,9 @@ def convert_to_mbar(value: float) -> float:
 
 def convert_to_mm(value: float) -> float:
     return round(value * 20.0, 1) if metric_system else value # Use metric tipping bucket modification
+
+def convert_clicks_to_mm(value: int) -> float:
+    return round(value * 0.20, 1) if metric_system else value * 0.01 # Use metric tipping bucket modification
 
 def convert_kmh_to_ms(windspeed: float) -> float:
     return round(windspeed / 3.6, 1)
@@ -303,7 +306,7 @@ def convert_raw_data_to_json(raw_data: str) -> dict:
                     }
                 elif key in ['RainRate']:
                     json_data[key] = { 
-                        'value': convert_to_mm(fvalue), 
+                        'value': convert_clicks_to_mm(fvalue), 
                         'unit_of_measure': 'mm/h' if metric_system else "inch/h",
                         'icon': 'mdi:water'
                     }
@@ -472,8 +475,9 @@ while True:
     output.close()
     if data == '':
         logger.error('Error acquiring data')
-        client.disconnect()
-        exit(2)
+        ready_to_send = False
+        # client.disconnect()
+        # exit(2)
 
     json_data = convert_raw_data_to_json(data)
 

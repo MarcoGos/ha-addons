@@ -1,0 +1,26 @@
+configuration:
+  device:
+    name: Device
+  mqtt_host:
+    name: MQTT Host
+    description: "MQTT auto discovery is used. If no MQTT is installed within Home Assistant you can provide the server info here."
+  mqtt_port:
+    name: MQTT Port
+  mqtt_user:
+    name: MQTT User
+  mqtt_pass:
+    name: MQTT Password
+  discovery_prefix:
+    name: "Discovery Prefix"
+    description: "Set the discovery prefix, usually this is 'homeassistant'."
+  unit_system:
+    name: "Use Imperial or Metric system"
+  interval:
+    name: Interval
+    description: "Interval in seconds: Seconds between each data retrieval."   
+  new_sensor_used:
+    name: "New temperature sensor"
+    description: "Use this setting if the new VP2 TH sensor 7346.070 is used on an older Vantage Pro 2. Temperature will be corrected with -0.5°C or -0.9°F."
+  log_level:
+    name: Log level
+    description: Controls the level of log details the add-on provides.
