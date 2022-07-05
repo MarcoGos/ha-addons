@@ -11,9 +11,9 @@ arch:
 apparmor: true
 options:
   device: null
-  interval: 5
+  interval: 30
   unit_system: Metric
-  new_sensor_used: true
+  new_sensor_used: false
   log_level: notice
 schema:
   device: device(subsystem=tty)

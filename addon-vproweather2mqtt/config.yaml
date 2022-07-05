@@ -11,7 +11,7 @@ arch:
 apparmor: true
 options:
   device: null
-  interval: 50
+  interval: 30
   unit_system: Metric
   log_level: info
 schema:

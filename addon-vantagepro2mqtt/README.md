@@ -6,13 +6,6 @@ Acquiring data from a Davis Vantage weather station using the pyvantagepro softw
 
 ### The following models should work:
 
-- Wizard III
-- Wizard II
-- Monitor
-- Perception
-- GroWeather
-- Energy Environmonitor
-- Health Environmonitor
 - Vantage Pro
 - Vantage Pro 2 (Rev B)
 - Weather Envoy

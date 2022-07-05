@@ -142,24 +142,24 @@ def send_data_to_mqtt(client: Any, data: dict):
             if not MAPPING[key]['has_correct_value'](value):
                 continue
 
-        logger.debug(f"{key}={value} (type={type(value)})")
-        component = 'sensor'
         if 'component' in MAPPING[key]:
             component = MAPPING[key]['component']
+        else:
+            component = 'sensor'
         if 'correction' in MAPPING[key]:
-            value += MAPPING[key]['correction']
+            value = MAPPING[key]['correction'](value)
         if metric_system and 'conversion' in MAPPING[key]:
             value = MAPPING[key]['conversion'](value)
-        if 'correction_function' in MAPPING[key]:
-            value = MAPPING[key]['correction_function'](value)
+        logger.debug(f"{key}={value} (type={type(value)})")
         client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}/state", value, retain=True)
 
 def add_additional_info(data: dict):
     data['HeatIndex'] = calc_heat_index(data['TempOut'], data['HumOut'])
     data['WindChill'] = calc_wind_chill(data['TempOut'], data['WindSpeed'])
-    data['FeelsLike'] = calc_feels_like(data['WindChill'], data['HeatIndex'], data['TempOut'])
+    data['FeelsLike'] = calc_feels_like(data['TempOut'], data['HumOut'], data['WindSpeed'])
     data['WindDirRose'] = get_wind_rose(data['WindDir'])
-    data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
+    if metric_system:
+        data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
     data['IsRaining'] = "ON" if data['RainRate'] > 0 else "OFF"
 
 def correct_temperature(data: dict):
@@ -188,6 +188,7 @@ except Exception as e:
     exit(1)
 
 if not hass_configured:
+    logger.info('Set weather station time to system time')
     device.settime(datetime.now())
 
 while True:
@@ -197,7 +198,6 @@ while True:
     add_additional_info(data)
 
     if not hass_configured:
-        logger.info('Set weather station time to system time')
         logger.info('Initializing sensors from Home Assistant to auto discover.')
         send_config_to_mqtt(client, data)
         hass_configured = True

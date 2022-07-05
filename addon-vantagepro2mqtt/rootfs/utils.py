@@ -1,5 +1,203 @@
+import math
 from datetime import datetime
 from time import strftime
+from typing import Any
+
+ForecastStrings = ["Mostly clear and cooler.",
+"Mostly clear with little temperature change.",
+"Mostly clear for 12 hrs. with little temperature change.",
+"Mostly clear for 12 to 24 hrs. and cooler.",
+"Mostly clear with little temperature change.",
+"Partly cloudy and cooler.",
+"Partly cloudy with little temperature change.",
+"Partly cloudy with little temperature change.",
+"Mostly clear and warmer.",
+"Partly cloudy with little temperature change.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 24 to 48 hrs.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds with little temperature change. Precipitation possible within 24 hrs.",
+"Mostly clear with little temperature change.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds with little temperature change. Precipitation possible within 12 hrs.",
+"Mostly clear with little temperature change.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 24 hrs.",
+"Mostly clear and warmer. Increasing winds.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 hrs. Increasing winds.",
+"Mostly clear and warmer. Increasing winds.",
+"Increasing clouds and warmer.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 hrs. Increasing winds.",
+"Mostly clear and warmer. Increasing winds.",
+"Increasing clouds and warmer.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 hrs. Increasing winds.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly clear and warmer. Precipitation possible within 48 hrs.",
+"Mostly clear and warmer.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds with little temperature change. Precipitation possible within 24 to 48 hrs.",
+"Increasing clouds with little temperature change.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 to 24 hrs.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 to 24 hrs. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 to 24 hrs. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 6 to 12 hrs.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 6 to 12 hrs. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 to 24 hrs. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation possible within 12 hrs.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and warmer. Precipitation likely.",
+"clearing and cooler. Precipitation ending within 6 hrs.",
+"Partly cloudy with little temperature change.",
+"clearing and cooler. Precipitation ending within 6 hrs.",
+"Mostly clear with little temperature change.",
+"Clearing and cooler. Precipitation ending within 6 hrs.",
+"Partly cloudy and cooler.",
+"Partly cloudy with little temperature change.",
+"Mostly clear and cooler.",
+"clearing and cooler. Precipitation ending within 6 hrs.",
+"Mostly clear with little temperature change.",
+"Clearing and cooler. Precipitation ending within 6 hrs.",
+"Mostly clear and cooler.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds with little temperature change. Precipitation possible within 24 hrs.",
+"Mostly cloudy and cooler. Precipitation continuing.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation likely.",
+"Mostly cloudy with little temperature change. Precipitation continuing.",
+"Mostly cloudy with little temperature change. Precipitation likely.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible and windy within 6 hrs.",
+"Increasing clouds with little temperature change. Precipitation possible and windy within 6 hrs.",
+"Mostly cloudy and cooler. Precipitation continuing. Increasing winds.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation likely. Increasing winds.",
+"Mostly cloudy with little temperature change. Precipitation continuing. Increasing winds.",
+"Mostly cloudy with little temperature change. Precipitation likely. Increasing winds.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible within 12 to 24 hrs. Possible wind shift to the W, NW, or N.",
+"Increasing clouds with little temperature change. Precipitation possible within 12 to 24 hrs. Possible wind shift to the W, NW, or N.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible within 6 hrs. Possible wind shift to the W, NW, or N.",
+"Increasing clouds with little temperature change. Precipitation possible within 6 hrs. Possible wind shift to the W, NW, or N.",
+"Mostly cloudy and cooler. Precipitation ending within 12 hrs. Possible wind shift to the W, NW, or N.",
+"Mostly cloudy and cooler. Possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation ending within 12 hrs. Possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Possible wind shift to the W, NW, or N.",
+"Mostly cloudy and cooler. Precipitation ending within 12 hrs. Possible wind shift to the W, NW, or N.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation possible within 24 hrs. Possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation ending within 12 hrs. Possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation possible within 24 hrs. Possible wind shift to the W, NW, or N.",
+"clearing, cooler and windy. Precipitation ending within 6 hrs.",
+"clearing, cooler and windy.",
+"Mostly cloudy and cooler. Precipitation ending within 6 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy and cooler. Windy with possible wind shift to the W, NW, or N.",
+"clearing, cooler and windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy with little temperature change. Precipitation possible within 12 hrs. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible within 12 hrs, possibly heavy at times. Windy.",
+"Mostly cloudy and cooler. Precipitation ending within 6 hrs. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation possible within 12 hrs. Windy.",
+"Mostly cloudy and cooler. Precipitation ending in 12 to 24 hrs.",
+"Mostly cloudy and cooler.",
+"Mostly cloudy and cooler. Precipitation continuing, possible heavy at times. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation possible within 6 to 12 hrs. Windy.",
+"Mostly cloudy with little temperature change. Precipitation continuing, possibly heavy at times. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy with little temperature change. Precipitation possible within 6 to 12 hrs. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds with little temperature change. Precipitation possible within 12 hrs, possibly heavy at times. Windy.",
+"Mostly cloudy and cooler. Windy.",
+"Mostly cloudy and cooler. Precipitation continuing, possibly heavy at times. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation likely, possibly heavy at times. Windy.",
+"Mostly cloudy with little temperature change. Precipitation continuing, possibly heavy at times. Windy.",
+"Mostly cloudy with little temperature change. Precipitation likely, possibly heavy at times. Windy.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible within 6 hrs. Windy.",
+"Increasing clouds with little temperature change. Precipitation possible within 6 hrs. windy",
+"Increasing clouds and cooler. Precipitation continuing. Windy with possible wind shift to the W, NW, or N.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation likely. Windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation continuing. Windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation likely. Windy with possible wind shift to the W, NW, or N.",
+"Increasing clouds and cooler. Precipitation possible within 6 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible within 6 hrs. Possible wind shift to the W, NW, or N.",
+"Increasing clouds with little temperature change. Precipitation possible within 6 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Increasing clouds with little temperature change. Precipitation possible within 6 hrs. Possible wind shift to the W, NW, or N.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible within 6 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Increasing clouds with little temperature change. Precipitation possible within 6 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Increasing clouds and cooler. Precipitation possible within 12 to 24 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Increasing clouds with little temperature change. Precipitation possible within 12 to 24 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy and cooler. Precipitation possibly heavy at times and ending within 12 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation possible within 6 to 12 hrs, possibly heavy at times. Windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation ending within 12 hrs. Windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation possible within 6 to 12 hrs, possibly heavy at times. Windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy and cooler. Precipitation continuing.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation likely, windy with possible wind shift to the W, NW, or N.",
+"Mostly cloudy with little temperature change. Precipitation continuing.",
+"Mostly cloudy with little temperature change. Precipitation likely.",
+"Partly cloudy with little temperature change.",
+"Mostly clear with little temperature change.",
+"Mostly cloudy and cooler. Precipitation possible within 12 hours, possibly heavy at times. Windy.",
+"FORECAST REQUIRES 3 HRS. OF RECENT DATA",
+"Mostly clear and cooler." ]
 
 def convert_to_celcius(value: float) -> float:
     return round((value - 32.0) * (5.0/9.0), 1)
@@ -88,13 +286,39 @@ def calc_wind_chill(temperature_f: float, windspeed: float) -> float:
 
     return wind_chill_f
 
-def calc_feels_like(windchill_f: float, heatindex_f: float, temperature_f: float) -> float:
-    if temperature_f <= 61:
-        feels_like_f = windchill_f
-    elif temperature_f >= 70:
-        feels_like_f = heatindex_f
-    else:
-        feels_like_f = temperature_f 
+def calc_feels_like(temperature_f: float, humidity: float, windspeed_mph: float) -> float:
+    if windspeed_mph == 0:
+        windspeed_mph = 1
+    feels_like_f = temperature_f
+    if temperature_f <= 50 and humidity >= 3:
+        feels_like_f = \
+            35.74 \
+            + (0.6215 * temperature_f) \
+            - (35.75 * pow(windspeed_mph, 0.16)) \
+            + (0.4275 * temperature_f * pow(windspeed_mph, 0.16))
+
+    if feels_like_f == temperature_f and temperature_f >= 80:
+        feels_like_f = \
+            0.5 * (temperature_f + 61 + ((temperature_f - 68) * 1.2) \
+            + (humidity * 0.094) )
+
+    if feels_like_f >= 80:
+        feels_like_f = \
+            -42.379 \
+            + (2.04901523 * temperature_f) \
+            + (10.14333127 * humidity) \
+            - (0.22475541 * temperature_f * humidity) \
+            - (0.00683783 * pow(temperature_f, 2)) \
+            - (0.05481717 * pow(humidity, 2)) \
+            + (0.00122874 * pow(temperature_f, 2) * humidity) \
+            + (0.00085282 * temperature_f * pow(humidity, 2)) \
+            - (0.00000199 * pow(temperature_f, 2) * pow(humidity, 2))
+
+    if humidity < 13 and temperature_f >= 80 and temperature_f <= 112:
+        feels_like_f = feels_like_f - ((13 - humidity) / 4) * math.sqrt((17 - math.fabs(temperature_f - 95.0)) / 17)
+
+    if humidity > 85 and temperature_f >= 80 and temperature_f <= 87:
+        feels_like_f = feels_like_f + ((humidity - 85) / 10) * ((87 - temperature_f) / 5)
     return feels_like_f
 
 def convert_to_iso_datetime(value: datetime) -> str:
@@ -136,3 +360,37 @@ def get_wind_rose(bearing: int) -> str:
 
 def has_correct_value(value: float) -> bool:
     return value != 255
+
+def round_to_one_decimal(value: float) -> float:
+    return round(value, 1)
+
+def get_baro_trend(trend: int) -> str:
+    if trend in [-60,196]:
+        return "Falling Rapidly"
+    elif trend in [-20,236]:
+        return "Falling Slowly"
+    elif trend == 0:
+        return "Steady"
+    elif trend == 20:
+        return "Rising Slowly"
+    elif trend == 60:
+        return "Rising Rapidly"
+    else:
+        return f"n/a ({trend})"
+
+def get_forecast_string(wrule: int) -> str:
+    if wrule > 194:
+        wrule = 194
+    return ForecastStrings[wrule]
+
+def get_uv(value: int) -> Any:
+    if value == 255:
+        return 'n/a'
+    else:
+        return value
+
+def get_solar_rad(value: int) -> Any:
+    if value == 32767:
+        return 'n/a'
+    else:
+        return value

@@ -4,7 +4,9 @@ MAPPING = {
     "Datetime": {
         "topic": "DavisTime",
         "long_name": "Davis Time",
-        "correction_function": convert_to_iso_datetime
+        "device_class": "timestamp",
+        "icon": "mdi:clock",
+        "correction": convert_to_iso_datetime
     },
     "TempOut": {
         "topic": "OutsideTemp",
@@ -34,6 +36,7 @@ MAPPING = {
         },
         "device_class": "temperature",
         "long_name": "Heat Index",
+        "icon": "mdi:sun-thermometer-outline",
         "conversion": convert_to_celcius
     },
     "WindChill": {
@@ -44,6 +47,7 @@ MAPPING = {
         },
         "device_class": "temperature",
         "long_name": "Wind Chill",
+        "icon": "mdi:snowflake-thermometer",
         "conversion": convert_to_celcius
     },
     "FeelsLike": {
@@ -68,16 +72,19 @@ MAPPING = {
     },
     "BarTrend": {
         "topic": "BaroTrend",
-        "long_name": "Barometric Trend"
+        "long_name": "Barometric Trend",
+        "correction": get_baro_trend
     },
     "HumIn": {
         "topic": "InsideHum",
         "unit_of_measure": "%",
+        "device_class": "humidity",
         "long_name": "Humidity (Inside)"
     },
     "HumOut": {
         "topic": "OutsideHum",
         "unit_of_measure": "%",
+        "device_class": "humidity", 
         "long_name": "Humidity (Outside)"
     },
     "WindSpeed": {
@@ -103,15 +110,18 @@ MAPPING = {
     "WindDir": {
         "topic": "WindDir",
         "unit_of_measure": "°",
-        "long_name": "Wind Direction"
+        "long_name": "Wind Direction",
+        "icon": "mdi:compass-outline"
     },
     "WindDirRose": {
         "topic": "WindDirRose",
-        "long_name": "Wind Direction Rose"
+        "long_name": "Wind Direction Rose",
+        "icon": "mdi:compass-outline"
     },
     "WindSpeedBft": {
         "topic": "WindSpeedBft",
-        "long_name": "Wind Speed (Bft)"
+        "long_name": "Wind Speed (Bft)",
+        "icon": "mdi:weather-windy",
     },
     "RainDay": {
         "topic": "DayRain",
@@ -160,17 +170,22 @@ MAPPING = {
     },
     "UV": {
         "topic": "UVLevel",
-        "long_name": "UV Level"
+        "long_name": "UV Level",
+        "icon": "mdi:sun-wireless-outline",
+        "correction": get_uv
     },
     "SolarRad": {
         "topic": "SolarRad",
-        "long_name": "Solar Radiation"
+        "long_name": "Solar Radiation",
+        "icon": "mdi:sun-wireless-outline",
+        "correction": get_solar_rad
     },
     "BatteryVolts": {
         "topic": "BattVoltage",
         "unit_of_measure": "V",
         "device_class": "voltage",
-        "long_name": "Battery Voltage"
+        "long_name": "Battery Voltage",
+        "correction": round_to_one_decimal
     },
     "ForecastIcon": {
         "topic": "ForeIcon",
@@ -178,7 +193,9 @@ MAPPING = {
     },
     "ForecastRuleNo": {
         "topic": "ForeRule",
-        "long_name": "Forecast Rule"
+        "long_name": "Forecast Rule",
+        "icon": "mdi:binoculars",
+        "correction": get_forecast_string
     },
     "ExtraTemps01": {
         "topic": "ExtraTemps01",
