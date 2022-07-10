@@ -12,7 +12,7 @@ from typing import Any
 handler = colorlog.StreamHandler()
 handler.setFormatter(colorlog.ColoredFormatter(
     fmt='[%(asctime)s] %(levelname)s: %(log_color)s%(message)s%(reset)s', 
-    datefmt='%H:%M:%S',
+    datefmt='%Y-%m-%d %H:%M:%S',
     log_colors={
 		'DEBUG':    'black',
 		'INFO':     'green',
