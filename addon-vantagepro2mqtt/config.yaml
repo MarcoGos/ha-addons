@@ -2,7 +2,7 @@ name: Vantage Pro to MQTT
 description: >-
   Vantage Pro Weather to MQTT gateway. Using the pyvantagepro library
 url: https://github.com/MarcoGos/homeassistant_vantagepro2mqtt/
-version: "0.0.1"
+version: "1.0.0"
 slug: "vantagepro2mqtt"
 arch:
   - aarch64
