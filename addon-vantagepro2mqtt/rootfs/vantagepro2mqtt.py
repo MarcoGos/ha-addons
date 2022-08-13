@@ -158,6 +158,7 @@ def add_additional_info(data: dict):
     data['WindChill'] = calc_wind_chill(data['TempOut'], data['WindSpeed'])
     data['FeelsLike'] = calc_feels_like(data['TempOut'], data['HumOut'], data['WindSpeed'])
     data['WindDirRose'] = get_wind_rose(data['WindDir'])
+    data['DewPoint'] = calc_dew_point(data['TempOut'], data['HumOut'])
     if metric_system:
         data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
     data['IsRaining'] = "ON" if data['RainRate'] > 0 else "OFF"

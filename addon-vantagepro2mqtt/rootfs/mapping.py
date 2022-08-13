@@ -60,6 +60,17 @@ MAPPING = {
         "long_name": "Feels Like",
         "conversion": convert_to_celcius
     },
+    "DewPoint": {
+        "topic": "DewPoint",
+        "unit_of_measure": {
+           "metric": "°C",
+           "imperial": "°F"
+        },
+        "device_class": "temperature",
+        "long_name": "Dew Point",
+        "icon": "mdi:water-thermometer-outline",
+        "conversion": convert_to_celcius
+    },
     "Barometer": {
         "topic": "BaroCurr",
         "unit_of_measure": {

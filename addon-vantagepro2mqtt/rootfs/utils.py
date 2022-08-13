@@ -201,7 +201,10 @@ ForecastStrings = ["Mostly clear and cooler.",
 
 def convert_to_celcius(value: float) -> float:
     return round((value - 32.0) * (5.0/9.0), 1)
-    
+
+def convert_celcius_to_fahrenheit(value_c: float) -> float:
+    return round(value_c * 1.8 + 32, 1)
+
 def convert_to_kmh(value: float) -> float:
     return round(value * 1.609344, 1)
 
@@ -394,3 +397,8 @@ def get_solar_rad(value: int) -> Any:
         return 'n/a'
     else:
         return value
+
+def calc_dew_point(temperature_f: float, humidity: float) -> float:
+    temperature_c = convert_to_celcius(temperature_f)
+    A = math.log(humidity / 100) + (17.62 * temperature_c / (243.12 + temperature_c))
+    return convert_celcius_to_fahrenheit(243.12 * A / (17.62 - A))
