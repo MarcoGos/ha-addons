@@ -7,3 +7,7 @@
 ## 1.0.1
 
 - Added dew point calculation
+
+## 1.0.2
+
+- Added address to configuration to use an ip link

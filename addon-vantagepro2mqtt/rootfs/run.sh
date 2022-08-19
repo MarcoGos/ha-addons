@@ -22,14 +22,21 @@ else
     fi
 fi
 
-DEVICE=$(bashio::config 'device')
+DEVICE=$(bashio::config "device" "")
+ADDRESS=$(bashio::config "address" "")
 INTERVAL=$(bashio::config "interval" 5)
 NEW_SENSOR_USED=$(bashio::config "new_sensor_used")
 UNIT_SYSTEM=$(bashio::config "unit_system")
 LOG_LEVEL=$(bashio::config "log_level")
 DISCOVERY_PREFIX=$(bashio::config "discovery_prefix" "homeassistant")
 
-ARGS="-d ${DEVICE}"
+ARGS=""
+if [ "${DEVICE}" != "" ]; then
+    ARGS+=" -d ${DEVICE}"
+fi
+if [ "${ADDRESS}" != "" ]; then 
+    ARGS+=" -a ${ADDRESS}"
+fi
 ARGS+=" -b ${MQTT_BROKER}"
 ARGS+=" -P ${MQTT_PORT}"
 ARGS+=" -u ${MQTT_USER}"
@@ -41,5 +48,7 @@ ARGS+=" -l ${LOG_LEVEL}"
 if $NEW_SENSOR_USED; then
     ARGS+=" -n"
 fi
+
+bashio::log.info "$ARGS"
 
 python3 -u ./vantagepro2mqtt.py $ARGS

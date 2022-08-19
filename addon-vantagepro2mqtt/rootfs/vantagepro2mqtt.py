@@ -34,6 +34,7 @@ log_levels = {
 }
 
 device = ""
+address = ""
 broker = ""
 port = 1883
 mqtt_user = ""
@@ -42,15 +43,20 @@ discovery_prefix = "homeassistant"
 prefix = 'vantagepro'
 unit_system = "Metric"
 hass_configured = False
+log_level = 'notice'
+interval = 30
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "d:b:P:u:p:I:s:i:nl:",["device=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level="])
+    opts, args = getopt.getopt(sys.argv[1:], ":d:a:b:P:u:p:I:s:i:nl:",["device=","address=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level="])
 except getopt.GetoptError:
-    print('vantagepro2mqtt.py -d <device> -b <broker>[-P <port>][-u <user>][-p <password>][-I <prefix>][-s <system>][-i <interval][-l <loglevel>][-n]')
+    print('vantagepro2mqtt.py [-d <device>|-a <address>] -b <broker>[-P <port>][-u <user>][-p <password>][-I <prefix>][-s <system>][-i <interval][-l <loglevel>][-n]')
     sys.exit(2)
 for opt, arg in opts:
+    logger.debug(f"{opt}={arg}")
     if opt in ('-d',"--device"):
         device = arg
+    elif opt in ("-a", "--address"):
+        address = arg
     elif opt in ("-b", "--broker"):
         broker = arg
     elif opt in ("-P", "--port"):
@@ -76,6 +82,7 @@ metric_system = unit_system == 'Metric'
 logger.setLevel(log_levels[log_level])
 
 logger.debug(f"device = {device}")
+logger.debug(f"address = {address}")
 logger.debug(f"broker = {broker}")
 logger.debug(f"port = {port}")
 logger.debug(f"mqtt_user = {mqtt_user}")
@@ -86,8 +93,8 @@ logger.debug(f"interval = {interval}")
 logger.debug(f"log_level = {log_level}")
 logger.debug(f"new_sensor_used = {new_sensor_used}")
 
-if not device:
-    logger.error("Must define DEVICE in configuration!")
+if not device and not address:
+    logger.error("Must define DEVICE or ADDRESS in configuration!")
     exit(1)
 
 if not broker:
@@ -181,19 +188,24 @@ except:
    logger.error("Connection to MQTT failed. Make sure broker, port, and user is defined correctly")
    exit(1)
 
-logger.info(f"Acquiring data from {device} using vproweather")
+if device:
+    link = f'serial:{device}:19200:8N1'
+else:
+    link = f'tcp:{address}'
+
+logger.info(f"Acquiring data from {link} using vproweather")
 try:
-    device = VantagePro2.from_url(f'serial:{device}:19200:8N1')
+    vantagepro2 = VantagePro2.from_url(link)
 except Exception as e:
     logger.error(f'{e}')
     exit(1)
 
 if not hass_configured:
     logger.info('Set weather station time to system time')
-    device.settime(datetime.now())
+    vantagepro2.settime(datetime.now())
 
 while True:
-    data = device.get_current_data()
+    data = vantagepro2.get_current_data()
     if new_sensor_used:
         correct_temperature(data)
     add_additional_info(data)
