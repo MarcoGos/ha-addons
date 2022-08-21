@@ -8,6 +8,7 @@ arch:
   - aarch64
   - amd64
   - armhf
+  - i386
 apparmor: true
 options:
   address: ""
