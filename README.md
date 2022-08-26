@@ -14,7 +14,6 @@ The add-on is installed like any other:
 4. Click <kbd>Install</kbd> and give it a few minutes to finish downloading.
 5. Configure at **Configuration** tab or separate file in [**Configuration folder**](https://www.home-assistant.io/getting-started/configuration/) according to the instructions of the selected add-on:
 
-- [vantagepro2mqtt](/addon-vantagepro2mqtt/)
 - [vproweather2mqtt](./addon-vproweather2mqtt)
 
 6. Click <kbd>Start</kbd>, give it a few seconds to spin up.
