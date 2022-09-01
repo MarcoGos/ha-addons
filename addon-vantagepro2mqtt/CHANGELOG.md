@@ -15,3 +15,7 @@
 ## 1.0.3
 
 - Now using docker hub image
+
+## 1.0.4
+
+- Changed name of device to Davis Weather Station.

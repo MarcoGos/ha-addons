@@ -45,6 +45,7 @@ unit_system = "Metric"
 hass_configured = False
 log_level = 'notice'
 interval = 30
+new_sensor_used = False
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], ":d:a:b:P:u:p:I:s:i:nl:",["device=","address=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level="])
@@ -129,7 +130,7 @@ def send_config_to_mqtt(client: Any, data: Any) -> None:
         config_payload["stat_t"] = "~/state"
         config_payload['dev'] = { 
             "ids": [prefix], 
-            "name": prefix, 
+            "name": "Davis Weather Station", 
             "mf": "Davis"
         }
         if unit_of_measure:
@@ -160,7 +161,7 @@ def send_data_to_mqtt(client: Any, data: dict):
         logger.debug(f"{key}={value} (type={type(value)})")
         client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}/state", value, retain=True)
 
-def add_additional_info(data: dict):
+def add_additional_info(data: dict) -> None:
     data['HeatIndex'] = calc_heat_index(data['TempOut'], data['HumOut'])
     data['WindChill'] = calc_wind_chill(data['TempOut'], data['WindSpeed'])
     data['FeelsLike'] = calc_feels_like(data['TempOut'], data['HumOut'], data['WindSpeed'])
