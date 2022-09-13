@@ -1,5 +1,5 @@
 # About
-This add-on uses the [pyvantagepro](https://pypi.org/project/PyVantagePro/) library to communicate to a Davis weather station like Davis Vantage Pro and Davis Vantage Vue. It produces several sensors via the MQTT integration under the device name "Davis Weather Station".
+This add-on uses the [pyvantagepro](https://pypi.org/project/PyVantagePro/) library to communicate with a Davis weather station like Davis Vantage Pro and Davis Vantage Vue. It produces several sensors via the MQTT integration under the device name "Davis Weather Station".
 
 # Configuration
 
@@ -21,3 +21,7 @@ Just leave it to "notice", only when experiencing problems you could change the 
 # Notes
 - Depending on your configuration, the MQTT server config may need to include the port, typically `1883` or `8883` for SSL communications. For example, `mqtt://core-mosquitto:1883` for Home Assistant's Mosquitto add-on.
 - To find out which serial ports you have exposed go to **Supervisor → System → Host system → ⋮ → Hardware**
+
+# Known issues
+- Once in a whill the Vantage Pro doesn't acknowledge the right way so an error shows up in the log: "ERROR: Check ACK: BAD ('\n\r' != '')". At that moment the realtime data couldn't be read and the pyscript exists. Don't worry, the add-on will keep on running.
+
