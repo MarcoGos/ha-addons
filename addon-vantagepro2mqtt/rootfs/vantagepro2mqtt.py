@@ -55,9 +55,11 @@ except getopt.GetoptError:
 for opt, arg in opts:
     logger.debug(f"{opt}={arg}")
     if opt in ('-d',"--device"):
-        device = arg
+        if arg != 'null':
+            device = arg
     elif opt in ("-a", "--address"):
-        address = arg
+        if arg != 'null':
+            address = arg
     elif opt in ("-b", "--broker"):
         broker = arg
     elif opt in ("-P", "--port"):
