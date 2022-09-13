@@ -19,3 +19,7 @@
 ## 1.0.4
 
 - Changed name of device to Davis Weather Station.
+
+## 1.0.5
+
+- Fixed issue when using address.
