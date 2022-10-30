@@ -208,6 +208,9 @@ def convert_celcius_to_fahrenheit(value_c: float) -> float:
 def convert_to_kmh(value: float) -> float:
     return round(value * 1.609344, 1)
 
+def convert_to_ms(value: float) -> float:
+    return convert_kmh_to_ms(convert_to_kmh(value))
+
 def convert_to_mbar(value: float) -> float:
     return round(value * 33.8637526, 1)
 
