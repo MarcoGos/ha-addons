@@ -28,3 +28,6 @@ configuration:
   log_level:
     name: Log level
     description: Controls the level of log details the add-on provides.
+  alt_windspeed_uom:
+    name: "Alternative windspeed unit of measure"
+    description: "Use m/s instead of km/h for windspeed (only applies to matric system)."
