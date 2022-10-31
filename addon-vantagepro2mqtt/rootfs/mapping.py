@@ -123,7 +123,7 @@ MAPPING = {
             },
             "imperial": "mph"
         },
-        "long_name": "Wind 10 minute Average Speed",
+        "long_name": "Wind Speed (10 min. avg)",
         "icon": "mdi:weather-windy",
         "conversion": {
             "default": convert_to_kmh,
