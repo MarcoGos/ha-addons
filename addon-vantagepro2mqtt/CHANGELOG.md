@@ -23,3 +23,8 @@
 ## 1.0.5
 
 - Fixed issue when using address.
+
+## 1.0.6
+
+- Added metric windspeed unit of measure alternative (m/s instead of km/h).
+- Changed name of windspeed 10 minutes average.

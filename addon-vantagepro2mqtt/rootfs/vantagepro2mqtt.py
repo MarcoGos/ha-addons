@@ -42,15 +42,16 @@ mqtt_pass = ""
 discovery_prefix = "homeassistant"
 prefix = 'vantagepro'
 unit_system = "Metric"
+alt_windspeed_uom = False
 hass_configured = False
 log_level = 'notice'
 interval = 30
 new_sensor_used = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], ":d:a:b:P:u:p:I:s:i:nl:",["device=","address=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level="])
+    opts, args = getopt.getopt(sys.argv[1:], ":d:a:b:P:u:p:I:s:i:nl:k",["device=","address=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level=", "alt_windspeed_uom"])
 except getopt.GetoptError:
-    print('vantagepro2mqtt.py [-d <device>|-a <address>] -b <broker>[-P <port>][-u <user>][-p <password>][-I <prefix>][-s <system>][-i <interval][-l <loglevel>][-n]')
+    print('vantagepro2mqtt.py [-d <device>|-a <address>] -b <broker>[-P <port>][-u <user>][-p <password>][-I <prefix>][-s <system>][-i <interval][-l <loglevel>][-n][-k]')
     sys.exit(2)
 for opt, arg in opts:
     logger.debug(f"{opt}={arg}")
@@ -78,6 +79,8 @@ for opt, arg in opts:
         new_sensor_used = True
     elif opt in ("-l", "--log_level"):
         log_level = arg
+    elif opt in ("-k", "--alt_windspeed_uom"):
+        alt_windspeed_uom = True
 
 metric_system = unit_system == 'Metric'
 # discovery_prefix = "homeassistant"
@@ -95,6 +98,7 @@ logger.debug(f"unit_system = {unit_system}")
 logger.debug(f"interval = {interval}")
 logger.debug(f"log_level = {log_level}")
 logger.debug(f"new_sensor_used = {new_sensor_used}")
+logger.debug(f"alt_windspeed_uom = {alt_windspeed_uom}")
 
 if not device and not address:
     logger.error("Must define DEVICE or ADDRESS in configuration!")
@@ -119,6 +123,11 @@ def send_config_to_mqtt(client: Any, data: Any) -> None:
             unit_of_measure =  MAPPING[key]['unit_of_measure']
             if type(unit_of_measure) is dict:
                 unit_of_measure = unit_of_measure['metric' if metric_system else 'imperial']
+            if type(unit_of_measure) is dict:
+                if metric_system and alt_windspeed_uom and 'alt' in unit_of_measure:
+                    unit_of_measure = unit_of_measure['alt']
+                else:
+                    unit_of_measure = unit_of_measure['default']
         if 'device_class' in MAPPING[key]:
             device_class = MAPPING[key]['device_class']
         if 'icon' in MAPPING[key]:
@@ -159,7 +168,13 @@ def send_data_to_mqtt(client: Any, data: dict):
         if 'correction' in MAPPING[key]:
             value = MAPPING[key]['correction'](value)
         if metric_system and 'conversion' in MAPPING[key]:
-            value = MAPPING[key]['conversion'](value)
+            conversion = MAPPING[key]['conversion']
+            if type(conversion) is dict:
+                if alt_windspeed_uom and 'alt' in conversion:
+                    conversion = conversion['alt']
+                else:
+                    conversion = conversion['default']
+            value = conversion(value)
         logger.debug(f"{key}={value} (type={type(value)})")
         client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}/state", value, retain=True)
 
@@ -169,8 +184,7 @@ def add_additional_info(data: dict) -> None:
     data['FeelsLike'] = calc_feels_like(data['TempOut'], data['HumOut'], data['WindSpeed'])
     data['WindDirRose'] = get_wind_rose(data['WindDir'])
     data['DewPoint'] = calc_dew_point(data['TempOut'], data['HumOut'])
-    if metric_system:
-        data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
+    data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
     data['IsRaining'] = "ON" if data['RainRate'] > 0 else "OFF"
 
 def correct_temperature(data: dict):

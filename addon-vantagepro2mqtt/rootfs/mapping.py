@@ -101,22 +101,34 @@ MAPPING = {
     "WindSpeed": {
         "topic": "WindSpeed",
         "unit_of_measure": {
-            "metric": "km/h",
+            "metric": {
+                "default": "km/h",
+                "alt": "m/s"
+            },
             "imperial": "mph"
         },
         "long_name": "Wind Speed",
         "icon": "mdi:weather-windy",
-        "conversion": convert_to_kmh
+        "conversion": {
+            "default": convert_to_kmh,
+            "alt": convert_to_ms
+        }
     },
     "WindSpeed10Min": {
         "topic": "WindAvgSpeed",
         "unit_of_measure": {
-            "metric": "km/h",
+            "metric": {
+                "default": "km/h",
+                "alt": "m/s"
+            },
             "imperial": "mph"
         },
-        "long_name": "Wind 10 minute Average Speed",
+        "long_name": "Wind Speed (Average)",
         "icon": "mdi:weather-windy",
-        "conversion": convert_to_kmh
+        "conversion": {
+            "default": convert_to_kmh,
+            "alt": convert_to_ms
+        }
     },
     "WindDir": {
         "topic": "WindDir",

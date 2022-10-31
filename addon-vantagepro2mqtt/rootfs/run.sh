@@ -29,6 +29,7 @@ NEW_SENSOR_USED=$(bashio::config "new_sensor_used")
 UNIT_SYSTEM=$(bashio::config "unit_system")
 LOG_LEVEL=$(bashio::config "log_level")
 DISCOVERY_PREFIX=$(bashio::config "discovery_prefix" "homeassistant")
+ALT_WINDSPEED_UOM=$(bashio::config "alt_windspeed_uom")
 
 ARGS=""
 if [ "${DEVICE}" != "" ]; then
@@ -47,6 +48,9 @@ ARGS+=" -i ${INTERVAL}"
 ARGS+=" -l ${LOG_LEVEL}"
 if $NEW_SENSOR_USED; then
     ARGS+=" -n"
+fi
+if $ALT_WINDSPEED_UOM; then
+    ARGS+=" -k"
 fi
 
 bashio::log.info "$ARGS"
