@@ -22,7 +22,7 @@ schema:
   address: "str?"
   interval: "int"
   unit_system: "list(Imperial|Metric)"
-  alt_windspeed_uom: "bool"
+  alt_windspeed_uom: "bool?"
   new_sensor_used: "bool"
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   mqtt_host: "str?"
