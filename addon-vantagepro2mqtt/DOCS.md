@@ -12,6 +12,9 @@ Enter an interval (in seconds) between each readout and update of the sensors. T
 ## Imperial or Metric
 Choose either Imperial or Metric system.
 
+## Alternative windspeed unit of measure
+Use this setting if you want the unit of measure of windspeed to be m/s instead of km/h. Only applies to metrix system.
+
 ## New temperature sensor
 Use this setting if the new VP2 TH sensor 7346.070 is used on an older Vantage Pro 2. Temperature will be corrected with -0.5°C or -0.9°F.
 
@@ -23,5 +26,5 @@ Just leave it to "notice", only when experiencing problems you could change the 
 - To find out which serial ports you have exposed go to **Supervisor → System → Host system → ⋮ → Hardware**
 
 # Known issues
-- Once in a whill the Vantage Pro doesn't acknowledge the right way so an error shows up in the log: "ERROR: Check ACK: BAD ('\n\r' != '')". At that moment the realtime data couldn't be read and the pyscript exists. Don't worry, the add-on will keep on running.
+- Once in a while the Vantage Pro doesn't acknowledge the right way so an error shows up in the log: "ERROR: Check ACK: BAD ('\n\r' != '')". At that moment the realtime data couldn't be read and the pyscript exits. Don't worry, the add-on will keep on running.
 
