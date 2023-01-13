@@ -46,10 +46,10 @@ ARGS+=" -I ${DISCOVERY_PREFIX}"
 ARGS+=" -s ${UNIT_SYSTEM}"
 ARGS+=" -i ${INTERVAL}"
 ARGS+=" -l ${LOG_LEVEL}"
-if $NEW_SENSOR_USED; then
+if [ "$NEW_SENSOR_USED" = true ]; then
     ARGS+=" -n"
 fi
-if $ALT_WINDSPEED_UOM; then
+if [ "$ALT_WINDSPEED_UOM" = true ]; then
     ARGS+=" -k"
 fi
 
