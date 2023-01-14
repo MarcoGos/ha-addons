@@ -28,3 +28,7 @@
 
 - Added metric windspeed unit of measure alternative (m/s instead of km/h).
 - Changed name of windspeed 10 minutes average.
+
+## 1.0.7
+
+- Small fix on starting the add-on
