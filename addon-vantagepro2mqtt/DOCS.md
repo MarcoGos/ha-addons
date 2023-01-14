@@ -13,7 +13,7 @@ Enter an interval (in seconds) between each readout and update of the sensors. T
 Choose either Imperial or Metric system.
 
 ## Alternative windspeed unit of measure
-Use this setting if you want the unit of measure of windspeed to be m/s instead of km/h. Only applies to metric system.
+Use this setting if you want the unit of measure of windspeed to be m/s instead of km/h. Only applies to metrix system.
 
 ## New temperature sensor
 Use this setting if the new VP2 TH sensor 7346.070 is used on an older Vantage Pro 2. Temperature will be corrected with -0.5°C or -0.9°F.
