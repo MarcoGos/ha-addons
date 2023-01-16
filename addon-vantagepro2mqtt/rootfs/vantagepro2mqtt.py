@@ -153,7 +153,7 @@ def send_config_to_mqtt(client: Any, data: Any) -> None:
         client.publish(f"{config_payload['~']}/config", json.dumps(config_payload), retain=True)
         logger.debug(f"Sent config for sensor {config_payload['~']}")
 
-def send_data_to_mqtt(client: Any, data: dict):
+def send_data_to_mqtt(client: Any, data: dict[str, Any]):
     for key, value in data.items():
         if not key in MAPPING:
             continue
@@ -178,7 +178,7 @@ def send_data_to_mqtt(client: Any, data: dict):
         logger.debug(f"{key}={value} (type={type(value)})")
         client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}/state", value, retain=True)
 
-def add_additional_info(data: dict) -> None:
+def add_additional_info(data: dict[str, Any]) -> None:
     data['HeatIndex'] = calc_heat_index(data['TempOut'], data['HumOut'])
     data['WindChill'] = calc_wind_chill(data['TempOut'], data['WindSpeed'])
     data['FeelsLike'] = calc_feels_like(data['TempOut'], data['HumOut'], data['WindSpeed'])
@@ -187,7 +187,7 @@ def add_additional_info(data: dict) -> None:
     data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
     data['IsRaining'] = "ON" if data['RainRate'] > 0 else "OFF"
 
-def correct_temperature(data: dict):
+def correct_temperature(data: dict[str, Any]):
     if 'TempOut' in data:
         data['TempOut'] -= 0.9
 #
