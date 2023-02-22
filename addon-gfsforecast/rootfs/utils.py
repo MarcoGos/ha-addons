@@ -42,8 +42,8 @@ def get_wind_rose(bearing: int) -> str:
 def ms_to_kmh(wind_speed: float) -> float:
     return round(wind_speed * 3.6, 1)
 
-def get_condition(sun_chance: int, rain: float, temperature_min: float) -> str:
-    if rain > 0:
+def get_condition(chance_of_sun: int, rain: float, temperature_min: float) -> str:
+    if rain > 0.2:
         if temperature_min > 3:
             if rain > 2:
                 return 'pouring'
@@ -54,8 +54,8 @@ def get_condition(sun_chance: int, rain: float, temperature_min: float) -> str:
         else:
             return 'snowy'
     else:
-        if sun_chance <= 10:
+        if chance_of_sun <= 10:
             return 'cloudy'
-        elif  sun_chance <= 80:
+        elif  chance_of_sun <= 80:
             return 'partlycloudy'
     return 'sunny'

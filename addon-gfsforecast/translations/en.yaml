@@ -7,6 +7,3 @@ configuration:
   max_offset:
     name: Maximum offset
     description: GFS is calculated until 384 hours in advance. The offset is between 1 and 384 hours.
-  gfs_detailed:
-    name: GFS detailed
-    description: Default GFS data is read with a 3 hours step, if enabled it will read data with a 1 hour step for the first 120 hours.

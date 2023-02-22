@@ -19,6 +19,5 @@ options:
 schema:
   log_level: list(debug|info|warning|error|fatal|critical)?
   max_offset: int(1,384)
-  gfs_detailed: bool?
 init: false
 #image: "marcogos/{arch}-addon-gfsforecast"

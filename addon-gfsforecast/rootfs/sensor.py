@@ -11,13 +11,11 @@ class Sensor:
     _api_url: str = 'http://supervisor/core/api'
     _sensor_data: dict[str, Any] = {}
     _sensor_file_path: str
-    _gfs_detailed: bool
 
-    def __init__(self, api_token: str, entity_id: str, gfs_detailed: bool) -> None:
+    def __init__(self, api_token: str, entity_id: str) -> None:
         self._api_token = api_token
         self._entity_id = entity_id
         self._sensor_file_path: str = f'/data/{entity_id}.json'
-        self._gfs_detailed = gfs_detailed
 
     def __get_api_url(self) -> str:
         return f"{self._api_url}/states/{self._entity_id}"
@@ -149,14 +147,18 @@ class Sensor:
         sensor_forecast: dict[str, Any] = {}
         sensor_forecast['datetime'] = gfs_date.strftime('%Y-%m-%dT00:00:00+00:00')
         sensor_forecast['condition'] = \
-            utils.get_condition(day_forecast['sun_chance'], day_forecast['rain'], day_forecast['min_temperature_daytime'])
+            utils.get_condition(day_forecast['chance_of_sun'], day_forecast['rain'], day_forecast['min_temperature_daytime'])
         if day_forecast['temperature_max'] > -999:
             sensor_forecast['temperature'] = round(day_forecast['temperature_max'])
         if day_forecast['temperature_min'] < 999:
             sensor_forecast['templow'] = round(day_forecast['temperature_min'])
         sensor_forecast['precipitation'] = round(day_forecast['rain'])
         sensor_forecast['wind_speed'] = day_forecast['windspeed']
+        sensor_forecast['wind_speed_bft'] = utils.convert_ms_to_bft(day_forecast['windspeed'])
+        sensor_forecast['wind_rose'] = utils.get_wind_rose(day_forecast['windangle'])
         sensor_forecast['wind_bearing'] = round(day_forecast['windangle'])
+        sensor_forecast['chance_of_sun'] = round(day_forecast['chance_of_sun'])
+        sensor_forecast['chance_of_rain'] = round(day_forecast['chance_of_rain'])
         return sensor_forecast
 
     def get_gps_position(self) -> tuple[float, float]:

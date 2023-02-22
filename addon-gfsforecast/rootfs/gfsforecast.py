@@ -109,17 +109,20 @@ class GfsForecast():
         tries = 0
         while tries < 3:
             self.logger.debug(f'Download {url}, try {tries +1}')
-            response = requests.get(url, headers=headers)
-            size = end - start +1
-            if (response.status_code == 206) & response.content.startswith(b'GRIB') & (len(response.content) == size): 
-                gribfile = './tmp.grib'
-                file = open(gribfile, 'wb')
-                file.write(response.content)
-                file.close()
-                time.sleep(1)
-                return gribfile
-            time.sleep(5)
-            tries += 1
+            try:
+                response = requests.get(url, headers=headers)
+                size = end - start +1
+                if (response.status_code == 206) & response.content.startswith(b'GRIB') & (len(response.content) == size): 
+                    gribfile = './tmp.grib'
+                    file = open(gribfile, 'wb')
+                    file.write(response.content)
+                    file.close()
+                    time.sleep(1)
+                    return gribfile
+                time.sleep(5)
+                tries += 1
+            except:
+                pass
         return ''
 
     def __read_value(self, grib_file: str, correction: float) -> float:
@@ -292,9 +295,9 @@ class GfsForecast():
             dt = pass_datetime + timedelta(hours = int(offset))
             if dt.date() not in forecast:
                 forecast[dt.date()] = {
-                    'rain_chance': 10,
+                    'chance_of_rain': 10,
                     'rain': 0,
-                    'sun_chance': 90,
+                    'chance_of_sun': 90,
                     'vwind': 0,
                     'uwind': 0,
                     'temperature_max': -999,
@@ -304,21 +307,21 @@ class GfsForecast():
                     'windangle': 0
                 }
 
-            forecast[dt.date()]['rain'] += day_data['rain']
-            if (dt.hour > 8) and (dt.hour < 22):
+            if (dt.hour >= 9) and (dt.hour <= 18):
+                forecast[dt.date()]['rain'] += day_data['rain']
                 forecast[dt.date()]['temperature_max'] = max(forecast[dt.date()]['temperature_max'], day_data['tmp'])
                 if dt.hour >= 9:
                     forecast[dt.date()]['min_temperature_daytime'] = min(forecast[dt.date()]['min_temperature_daytime'], day_data['tmp'])
                 if day_data['cldtotal'] >= 75:
-                    forecast[dt.date()]['sun_chance'] -= 16 * day_data['cldtotal'] / 100
-                if forecast[dt.date()]['sun_chance'] == 90 and \
-                   (day_data['cldhigh'] >= 80 or day_data['cldlow'] > 10):
-                    forecast[dt.date()]['sun_chance'] -= 10
+                    forecast[dt.date()]['chance_of_sun'] -= 16 * day_data['cldtotal'] / 100
+                if forecast[dt.date()]['chance_of_sun'] == 90 and \
+                   (day_data['cldhigh'] >= 80 or day_data['cldlow'] >= 10):
+                    forecast[dt.date()]['chance_of_sun'] -= 10
 
                 if day_data['rain'] >= 2:
-                    forecast[dt.date()]['rain_chance'] = 90
-                elif day_data['rain'] > 0:
-                    forecast[dt.date()]['rain_chance'] += 10
+                    forecast[dt.date()]['chance_of_rain'] = 90
+                elif day_data['rain'] > 0.1:
+                    forecast[dt.date()]['chance_of_rain'] += 10
 
                 forecast[dt.date()]['vwind'] += day_data['vwind']
                 forecast[dt.date()]['uwind'] += day_data['uwind']
@@ -330,5 +333,9 @@ class GfsForecast():
         for forecast_date in forecast:
             _,windangle = utils.get_wind_info(forecast[forecast_date]['vwind'], forecast[forecast_date]['uwind'])
             forecast[forecast_date]['windangle'] = windangle
+            forecast[forecast_date]['chance_of_rain'] = min(forecast[forecast_date]['chance_of_rain'], 90)
+            forecast[forecast_date]['chance_of_rain'] = round(forecast[forecast_date]['chance_of_rain'], -1)
+            forecast[forecast_date]['chance_of_sun'] = round(forecast[forecast_date]['chance_of_sun'], -1)
+            
 
         return forecast

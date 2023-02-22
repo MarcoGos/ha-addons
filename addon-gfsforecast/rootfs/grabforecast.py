@@ -10,10 +10,9 @@ import os
 log_level: str = 'info'
 max_offset: int = 168
 api_token: str = os.environ['SUPERVISOR_TOKEN'] if 'SUPERVISOR_TOKEN' in os.environ else ''
-gfs_detailed: bool = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "l:m:d",["log_level=", "max_offset", "detailed"])
+    opts, args = getopt.getopt(sys.argv[1:], "l:m:d",["log_level=", "max_offset"])
 except getopt.GetoptError:
     print('grabforecast.py [-l <loglevel>][-m <maxoffset>][-d]')
     sys.exit(2)
@@ -22,8 +21,6 @@ for opt, arg in opts:
         log_level = arg
     if opt in ("-m", "--max_offset"):
         max_offset = int(arg)
-    if opt in ("-d", "--detailed"):
-        gfs_detailed = True
 
 logger.setLevel(log_levels[log_level])
 
@@ -35,13 +32,13 @@ def keyboard_callback(inp: str) -> None:
 #start listening to input - thread
 keyboard_thread = KeyboardThread(keyboard_callback)
 
-sensor = Sensor(api_token, 'weather.gfsforecast', gfs_detailed)
+sensor = Sensor(api_token, 'weather.gfsforecast')
 latitude, longitude = sensor.get_gps_position()
 gfs_forecast = GfsForecast(logger, latitude, longitude, max_offset)
 
 while True:
-    offset: int = 1 if gfs_detailed else 3
-    step: int = 1 if gfs_detailed else 3
+    offset: int = 3
+    step: int = 3
 
     if gfs_forecast.find_latest_pass_info():
         sensor.set_sensor_base_data(*gfs_forecast.get_date_and_pass())
