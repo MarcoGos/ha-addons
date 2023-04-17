@@ -3,6 +3,7 @@ import json
 from requests import get, post
 from datetime import datetime, timedelta, date
 import utils
+import time
 from logger import logger
 from typing import Any
 
@@ -164,10 +165,14 @@ class Sensor:
     def get_gps_position(self) -> tuple[float, float]:
         url = f'{self._api_url}/config'
         headers = self.__get_api_headers()
-        response = get(url, headers=headers)
-        if not (response.status_code in [200, 201]):
-            logger.error(f'Could not get config: {response.status_code} - {response.text}')
-            return 0, 0
-        data = json.loads(response.text)
-        logger.info(f'Found gps location {data["latitude"]} {data["longitude"]}')
-        return data['latitude'], data['longitude']
+        count = 0
+        while count < 3:
+            response = get(url, headers=headers)
+            if response.status_code in [200, 201]:
+                data = json.loads(response.text)
+                logger.info(f'Found gps location {data["latitude"]} {data["longitude"]}')
+                return data['latitude'], data['longitude']
+            else:
+                time.sleep(1)
+            count += 1
+        raise ValueError('Could not acquire gps location')
