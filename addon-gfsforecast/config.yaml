@@ -20,4 +20,4 @@ schema:
   log_level: list(debug|info|warning|error|fatal|critical)?
   max_offset: int(1,384)
 init: false
-#image: "marcogos/{arch}-addon-gfsforecast"
+image: "marcogos/{arch}-addon-gfsforecast"
