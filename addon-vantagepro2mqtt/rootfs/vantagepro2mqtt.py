@@ -210,19 +210,21 @@ if device:
 else:
     link = f'tcp:{address}'
 
-logger.info(f"Acquiring data from {link} using vproweather")
-try:
-    vantagepro2 = VantagePro2.from_url(link)
-except Exception as e:
-    logger.error(f'{e}')
-    exit(1)
-
-if not hass_configured:
-    logger.info('Set weather station time to system time')
-    vantagepro2.settime(datetime.now())
-
 while True:
+    logger.info(f"Acquiring data from {link} using vproweather")
+    try:
+        vantagepro2 = VantagePro2.from_url(link)
+    except Exception as e:
+        logger.error(f'{e}')
+        exit(1)
+
+    if not hass_configured:
+        logger.info('Set weather station time to system time')
+        vantagepro2.settime(datetime.now())
+
     data = vantagepro2.get_current_data()
+    vantagepro2.link.close()
+
     if new_sensor_used:
         correct_temperature(data)
     add_additional_info(data)

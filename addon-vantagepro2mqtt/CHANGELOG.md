@@ -32,3 +32,7 @@
 ## 1.0.7
 
 - Small fix on starting the add-on
+
+## 1.0.8
+
+- Close connection (and free tcp/serial port) after each data received.
