@@ -4,7 +4,7 @@ This add-on uses the [pyvantagepro](https://pypi.org/project/PyVantagePro/) libr
 # Configuration
 
 ##  Device or Address
-First "Show unused optional configuration options" so all options are visible. Now choose a communication protocol by either entering a serial device or an ip address combined with a port (eg. 192.168.1.32:1111).
+First "Show unused optional configuration options" so all options are visible. Now choose a communication protocol by either entering a serial device or an ip address combined with a port (eg. 192.168.1.32:22222, use ip address and port number defined in the Weatherlink setup program).
 
 ## Interval
 Enter an interval (in seconds) between each readout and update of the sensors. The shorter the interval the more the history will be flooded so keep that in mind.

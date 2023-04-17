@@ -4,7 +4,7 @@ configuration:
     description: "Vul hier een apparaat (serieel) in."
   address:
     name: Adres
-    description: "Kies of voor het invullen van een adres (bijv. 192.168.1.25:1111) of voor een serieel apparaat (door de ongebruikte optionele configuratieopties te tonen)."
+    description: "Kies of voor het invullen van een adres (bijv. 192.168.1.25:22222) of voor een serieel apparaat (door de ongebruikte optionele configuratieopties te tonen)."
   mqtt_host:
     name: "MQTT Server"
     description: "Er wordt gebruik gemaakt van MQTT autodiscovery. Als dat niet mogelijk is dan kan hier de MQTT server gegevens ingevuld worden."

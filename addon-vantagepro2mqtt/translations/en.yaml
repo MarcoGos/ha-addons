@@ -4,7 +4,7 @@ configuration:
     description: "Choose a serial device."
   address:
     name: Address
-    description: "You need to provide either an address (eg. 192.168.1.25:1111) or a serial device (by showing unused optional configuration options)."
+    description: "You need to provide either an address (eg. 192.168.1.25:22222) or a serial device (by showing unused optional configuration options)."
   mqtt_host:
     name: MQTT Host
     description: "MQTT auto discovery is used. If no MQTT is installed within Home Assistant you can provide the server info here."

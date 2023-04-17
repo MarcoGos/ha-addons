@@ -1,0 +1,9 @@
+configuration:
+  unit_system:
+    name: "Use Imperial or Metric system"
+  log_level:
+    name: Log level
+    description: Controls the level of log details the add-on provides.
+  max_offset:
+    name: Maximum offset
+    description: GFS is calculated until 384 hours in advance. The offset is between 1 and 384 hours.
