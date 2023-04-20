@@ -36,3 +36,7 @@
 ## 1.0.8
 
 - Close connection (and free tcp/serial port) after each data received.
+
+## 1.0.9
+
+- Fixed issue MQTT not updating when interval larger than 60 seconds.
