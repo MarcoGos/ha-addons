@@ -15,6 +15,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Temperature (Outside)",
         "conversion": convert_to_celcius
     },
@@ -78,6 +79,7 @@ MAPPING = {
             "imperial": "inHg"
         }, 
         "device_class": "pressure",
+        "state_class": "measurement",
         "long_name": "Barometric Pressure",
         "conversion": convert_to_mbar
     },
@@ -96,6 +98,7 @@ MAPPING = {
         "topic": "OutsideHum",
         "unit_of_measure": "%",
         "device_class": "humidity", 
+        "state_class": "measurement",
         "long_name": "Humidity (Outside)"
     },
     "WindSpeed": {
@@ -109,6 +112,7 @@ MAPPING = {
         },
         "long_name": "Wind Speed",
         "icon": "mdi:weather-windy",
+        "state_class": "measurement",
         "conversion": {
             "default": convert_to_kmh,
             "alt": convert_to_ms
@@ -125,6 +129,7 @@ MAPPING = {
         },
         "long_name": "Wind Speed (Average)",
         "icon": "mdi:weather-windy",
+        "state_class": "measurement",
         "conversion": {
             "default": convert_to_kmh,
             "alt": convert_to_ms
@@ -145,6 +150,7 @@ MAPPING = {
         "topic": "WindSpeedBft",
         "long_name": "Wind Speed (Bft)",
         "icon": "mdi:weather-windy",
+        "state_class": "measurement",
     },
     "RainDay": {
         "topic": "DayRain",
@@ -154,6 +160,7 @@ MAPPING = {
         },
         "icon": 'mdi:water',
         "long_name": "Rain (Day)",
+        "state_class": "total_increasing",
         "conversion": convert_to_mm
     },
     "RainMonth": {
