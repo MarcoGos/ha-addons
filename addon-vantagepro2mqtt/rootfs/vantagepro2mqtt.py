@@ -116,6 +116,7 @@ def send_config_to_mqtt(client: Any, data: Any) -> None:
             if not MAPPING[key]['has_correct_value'](value):
                 continue
         device_class = '' 
+        state_class = ''
         unit_of_measure = ''
         component = 'sensor'
         icon = ''
@@ -130,6 +131,8 @@ def send_config_to_mqtt(client: Any, data: Any) -> None:
                     unit_of_measure = unit_of_measure['default']
         if 'device_class' in MAPPING[key]:
             device_class = MAPPING[key]['device_class']
+        if 'state_class' in MAPPING[key]:
+            state_class = MAPPING[key]['state_class']
         if 'icon' in MAPPING[key]:
             icon = MAPPING[key]['icon']
         if 'component' in MAPPING[key]:
@@ -148,6 +151,8 @@ def send_config_to_mqtt(client: Any, data: Any) -> None:
             config_payload["unit_of_meas"] = unit_of_measure
         if device_class:
             config_payload["dev_cla"] = device_class
+        if state_class:
+            config_payload["stat_cla"] = state_class
         if icon:
             config_payload['ic'] = icon
         client.publish(f"{config_payload['~']}/config", json.dumps(config_payload), retain=True)
@@ -205,40 +210,42 @@ else:
     link = f'tcp:{address}'
 
 while True:
-    logger.info(f"Acquiring data from {link} using vproweather")
+    data = None
     try:
+        logger.info(f"Acquiring data from {link} using vproweather")
         vantagepro2 = VantagePro2.from_url(link)
-    except Exception as e:
-        logger.error(f'{e}')
-        exit(1)
 
-    if not hass_configured:
-        logger.info('Set weather station time to system time')
-        vantagepro2.settime(datetime.now())
+        if not hass_configured:
+            logger.info('Set weather station time to system time')
+            vantagepro2.settime(datetime.now())
 
-    data = vantagepro2.get_current_data()
-    vantagepro2.link.close()
+        data = vantagepro2.get_current_data()
+        if vantagepro2.link:
+            vantagepro2.link.close()
+    except Exception:
+        pass
 
-    if not client.is_connected():
-        try:
-            logger.info("Not connected to MQTT, connecting...")
-            client.connect(broker, port, keepalive=interval*3)
-            logger.info("Connected to MQTT")
-        except Exception as e:
-            logger.error("Connection to MQTT failed. Make sure broker, port, and user is defined correctly")
-            raise ValueError(f"Connection to MQTT failed: {e}")
+    if data:
+        if not client.is_connected():
+            try:
+                logger.info("Not connected to MQTT, connecting...")
+                client.connect(broker, port, keepalive=interval*3)
+                logger.info("Connected to MQTT")
+            except Exception as e:
+                logger.error("Connection to MQTT failed. Make sure broker, port, and user is defined correctly")
+                raise ValueError(f"Connection to MQTT failed: {e}")
 
-    if new_sensor_used:
-        correct_temperature(data)
-    add_additional_info(data)
+        if new_sensor_used:
+            correct_temperature(data)
+        add_additional_info(data)
 
-    if not hass_configured:
-        logger.info('Initializing sensors from Home Assistant to auto discover')
-        send_config_to_mqtt(client, data)
-        hass_configured = True
+        if not hass_configured:
+            logger.info('Initializing sensors from Home Assistant to auto discover')
+            send_config_to_mqtt(client, data)
+            hass_configured = True
 
-    send_data_to_mqtt(client, data)
-    logger.info('Data sent to MQTT')
+        send_data_to_mqtt(client, data)
+        logger.info('Data sent to MQTT')
 
     logger.info(f'Now waiting for {interval} seconds for next cycle')
     time.sleep(interval)

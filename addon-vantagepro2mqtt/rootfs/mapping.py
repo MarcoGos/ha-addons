@@ -15,6 +15,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Temperature (Outside)",
         "conversion": convert_to_celcius
     },
@@ -25,6 +26,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Temperature (Inside)",
         "conversion": convert_to_celcius
     },
@@ -35,6 +37,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Heat Index",
         "icon": "mdi:sun-thermometer-outline",
         "conversion": convert_to_celcius
@@ -46,6 +49,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Wind Chill",
         "icon": "mdi:snowflake-thermometer",
         "conversion": convert_to_celcius
@@ -57,6 +61,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Feels Like",
         "conversion": convert_to_celcius
     },
@@ -67,6 +72,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Dew Point",
         "icon": "mdi:water-thermometer-outline",
         "conversion": convert_to_celcius
@@ -78,6 +84,7 @@ MAPPING = {
             "imperial": "inHg"
         }, 
         "device_class": "pressure",
+        "state_class": "measurement",
         "long_name": "Barometric Pressure",
         "conversion": convert_to_mbar
     },
@@ -90,12 +97,14 @@ MAPPING = {
         "topic": "InsideHum",
         "unit_of_measure": "%",
         "device_class": "humidity",
+        "state_class": "measurement",
         "long_name": "Humidity (Inside)"
     },
     "HumOut": {
         "topic": "OutsideHum",
         "unit_of_measure": "%",
         "device_class": "humidity", 
+        "state_class": "measurement",
         "long_name": "Humidity (Outside)"
     },
     "WindSpeed": {
@@ -109,6 +118,7 @@ MAPPING = {
         },
         "long_name": "Wind Speed",
         "icon": "mdi:weather-windy",
+        "state_class": "measurement",
         "conversion": {
             "default": convert_to_kmh,
             "alt": convert_to_ms
@@ -125,6 +135,7 @@ MAPPING = {
         },
         "long_name": "Wind Speed (Average)",
         "icon": "mdi:weather-windy",
+        "state_class": "measurement",
         "conversion": {
             "default": convert_to_kmh,
             "alt": convert_to_ms
@@ -134,7 +145,8 @@ MAPPING = {
         "topic": "WindDir",
         "unit_of_measure": "°",
         "long_name": "Wind Direction",
-        "icon": "mdi:compass-outline"
+        "icon": "mdi:compass-outline",
+        "state_class": "measurement"
     },
     "WindDirRose": {
         "topic": "WindDirRose",
@@ -145,6 +157,7 @@ MAPPING = {
         "topic": "WindSpeedBft",
         "long_name": "Wind Speed (Bft)",
         "icon": "mdi:weather-windy",
+        "state_class": "measurement",
     },
     "RainDay": {
         "topic": "DayRain",
@@ -154,6 +167,7 @@ MAPPING = {
         },
         "icon": 'mdi:water',
         "long_name": "Rain (Day)",
+        "state_class": "total_increasing",
         "conversion": convert_to_mm
     },
     "RainMonth": {
@@ -183,6 +197,7 @@ MAPPING = {
             "imperial": "inch/h"
         },
         "icon": "mdi:water",
+        "state_class": "measurement",
         "long_name": "Rain Rate",
         "conversion": convert_to_mm
     },
@@ -195,12 +210,14 @@ MAPPING = {
         "topic": "UVLevel",
         "long_name": "UV Level",
         "icon": "mdi:sun-wireless-outline",
+        "state_class": "measurement",
         "correction": get_uv
     },
     "SolarRad": {
         "topic": "SolarRad",
         "long_name": "Solar Radiation",
         "icon": "mdi:sun-wireless-outline",
+        "state_class": "measurement",
         "correction": get_solar_rad
     },
     "BatteryVolts": {
@@ -227,6 +244,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 1",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -238,6 +256,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 2",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -249,6 +268,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 3",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -260,6 +280,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 4",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -271,6 +292,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 5",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -282,6 +304,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 6",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -293,6 +316,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 7",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value

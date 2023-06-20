@@ -40,3 +40,8 @@
 ## 1.0.9
 
 - Fixed issue MQTT not updating when interval larger than 60 seconds.
+
+## 1.0.10
+
+- Fixed error on closing link.
+- Added long term statistics.
