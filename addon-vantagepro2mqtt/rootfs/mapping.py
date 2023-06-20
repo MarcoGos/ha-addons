@@ -26,6 +26,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Temperature (Inside)",
         "conversion": convert_to_celcius
     },
@@ -36,6 +37,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Heat Index",
         "icon": "mdi:sun-thermometer-outline",
         "conversion": convert_to_celcius
@@ -47,6 +49,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Wind Chill",
         "icon": "mdi:snowflake-thermometer",
         "conversion": convert_to_celcius
@@ -58,6 +61,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Feels Like",
         "conversion": convert_to_celcius
     },
@@ -68,6 +72,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Dew Point",
         "icon": "mdi:water-thermometer-outline",
         "conversion": convert_to_celcius
@@ -92,6 +97,7 @@ MAPPING = {
         "topic": "InsideHum",
         "unit_of_measure": "%",
         "device_class": "humidity",
+        "state_class": "measurement",
         "long_name": "Humidity (Inside)"
     },
     "HumOut": {
@@ -139,7 +145,8 @@ MAPPING = {
         "topic": "WindDir",
         "unit_of_measure": "°",
         "long_name": "Wind Direction",
-        "icon": "mdi:compass-outline"
+        "icon": "mdi:compass-outline",
+        "state_class": "measurement"
     },
     "WindDirRose": {
         "topic": "WindDirRose",
@@ -190,6 +197,7 @@ MAPPING = {
             "imperial": "inch/h"
         },
         "icon": "mdi:water",
+        "state_class": "measurement",
         "long_name": "Rain Rate",
         "conversion": convert_to_mm
     },
@@ -202,12 +210,14 @@ MAPPING = {
         "topic": "UVLevel",
         "long_name": "UV Level",
         "icon": "mdi:sun-wireless-outline",
+        "state_class": "measurement",
         "correction": get_uv
     },
     "SolarRad": {
         "topic": "SolarRad",
         "long_name": "Solar Radiation",
         "icon": "mdi:sun-wireless-outline",
+        "state_class": "measurement",
         "correction": get_solar_rad
     },
     "BatteryVolts": {
@@ -234,6 +244,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 1",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -245,6 +256,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 2",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -256,6 +268,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 3",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -267,6 +280,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 4",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -278,6 +292,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 5",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -289,6 +304,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 6",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
@@ -300,6 +316,7 @@ MAPPING = {
            "imperial": "°F"
         },
         "device_class": "temperature",
+        "state_class": "measurement",
         "long_name": "Extra Temperature 7",
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value

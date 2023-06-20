@@ -44,4 +44,4 @@
 ## 1.0.10
 
 - Fixed error on closing link.
-- Added long term statistics for temperature, humidity, barometric pressure, wind speed, average wind speed, wind speed (Bft) and daily rain
+- Added long term statistics.
