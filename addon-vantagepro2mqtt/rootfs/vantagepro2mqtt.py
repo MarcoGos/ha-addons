@@ -109,54 +109,63 @@ if not broker:
     exit(1)
 
 def send_config_to_mqtt(client: Any, data: Any) -> None:
+    send_config_entity_to_mqtt('Status')
     for key, value in data.items():
         if not key in MAPPING:
             continue
         if 'has_correct_value' in MAPPING[key]:
             if not MAPPING[key]['has_correct_value'](value):
                 continue
-        device_class = '' 
-        state_class = ''
-        unit_of_measure = ''
-        component = 'sensor'
-        icon = ''
-        if 'unit_of_measure' in MAPPING[key]:
-            unit_of_measure =  MAPPING[key]['unit_of_measure']
-            if type(unit_of_measure) is dict:
-                unit_of_measure = unit_of_measure['metric' if metric_system else 'imperial']
-            if type(unit_of_measure) is dict:
-                if metric_system and alt_windspeed_uom and 'alt' in unit_of_measure:
-                    unit_of_measure = unit_of_measure['alt']
-                else:
-                    unit_of_measure = unit_of_measure['default']
-        if 'device_class' in MAPPING[key]:
-            device_class = MAPPING[key]['device_class']
-        if 'state_class' in MAPPING[key]:
-            state_class = MAPPING[key]['state_class']
-        if 'icon' in MAPPING[key]:
-            icon = MAPPING[key]['icon']
-        if 'component' in MAPPING[key]:
-            component = MAPPING[key]['component']
-        config_payload = {}
-        config_payload["~"] = f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}"
-        config_payload["name"] = MAPPING[key]['long_name'] 
-        config_payload["uniq_id"] = f"{prefix}_{MAPPING[key]['topic'].lower()}"
-        config_payload["stat_t"] = "~/state"
-        config_payload['dev'] = { 
-            "ids": [prefix], 
-            "name": "Davis Weather Station", 
-            "mf": "Davis"
-        }
-        if unit_of_measure:
-            config_payload["unit_of_meas"] = unit_of_measure
-        if device_class:
-            config_payload["dev_cla"] = device_class
-        if state_class:
-            config_payload["stat_cla"] = state_class
-        if icon:
-            config_payload['ic'] = icon
-        client.publish(f"{config_payload['~']}/config", json.dumps(config_payload), retain=True)
-        logger.debug(f"Sent config for sensor {config_payload['~']}")
+        send_config_entity_to_mqtt(key)
+
+def send_config_entity_to_mqtt(key: str):
+    device_class = '' 
+    state_class = ''
+    unit_of_measure = ''
+    component = 'sensor'
+    entity_category = ''
+    icon = ''
+    if 'unit_of_measure' in MAPPING[key]:
+        unit_of_measure =  MAPPING[key]['unit_of_measure']
+        if type(unit_of_measure) is dict:
+            unit_of_measure = unit_of_measure['metric' if metric_system else 'imperial']
+        if type(unit_of_measure) is dict:
+            if metric_system and alt_windspeed_uom and 'alt' in unit_of_measure:
+                unit_of_measure = unit_of_measure['alt']
+            else:
+                unit_of_measure = unit_of_measure['default']
+    if 'device_class' in MAPPING[key]:
+        device_class = MAPPING[key]['device_class']
+    if 'entity_category' in MAPPING[key]:
+        entity_category = MAPPING[key]['entity_category']
+    if 'state_class' in MAPPING[key]:
+        state_class = MAPPING[key]['state_class']
+    if 'icon' in MAPPING[key]:
+        icon = MAPPING[key]['icon']
+    if 'component' in MAPPING[key]:
+        component = MAPPING[key]['component']
+    config_payload = {}
+    config_payload["~"] = f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}"
+    config_payload["name"] = MAPPING[key]['long_name'] 
+    config_payload["uniq_id"] = f"{prefix}_{MAPPING[key]['topic'].lower()}"
+    config_payload["stat_t"] = "~/state"
+    config_payload['dev'] = { 
+        "ids": [prefix], 
+        "name": "Davis Weather Station", 
+        "mf": "Davis"
+    }
+    if unit_of_measure:
+        config_payload["unit_of_meas"] = unit_of_measure
+    if device_class:
+        config_payload["dev_cla"] = device_class
+    if entity_category:
+        config_payload["ent_cat"] = entity_category
+    if state_class:
+        config_payload["stat_cla"] = state_class
+    if icon:
+        config_payload['ic'] = icon
+    client.publish(f"{config_payload['~']}/config", json.dumps(config_payload), retain=True)
+    logger.debug(f"Sent config for sensor {config_payload['~']}")
 
 def send_data_to_mqtt(client: Any, data: dict[str, Any]):
     for key, value in data.items():
@@ -183,6 +192,10 @@ def send_data_to_mqtt(client: Any, data: dict[str, Any]):
         logger.debug(f"{key}={value} (type={type(value)})")
         client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}/state", value, retain=True)
 
+def send_status_to_mqtt(client: Any, value: str):
+    component = 'sensor'
+    client.publish(f"{discovery_prefix}/{component}/{prefix}/Status/state", value, retain=True)
+
 def add_additional_info(data: dict[str, Any]) -> None:
     data['HeatIndex'] = calc_heat_index(data['TempOut'], data['HumOut'])
     data['WindChill'] = calc_wind_chill(data['TempOut'], data['WindSpeed'])
@@ -199,42 +212,36 @@ def correct_temperature(data: dict[str, Any]):
 # MAIN
 #
 client = mqtt.Client()
-
 if mqtt_user and mqtt_pass:
     logger.debug('Added MQTT user and password')
     client.username_pw_set(mqtt_user, mqtt_pass)
+logger.info("Connecting to MQTT broker")
+client.connect(broker, port)
+client.loop_start()
 
 if device:
     link = f'serial:{device}:19200:8N1'
 else:
     link = f'tcp:{address}'
 
+logger.info("Connecting to weather station")
+vantagepro2 = VantagePro2.from_url(link)
+if not hass_configured:
+    logger.info('Set weather station time to system time')
+    vantagepro2.settime(datetime.now())
+
 while True:
     data = None
     try:
+        vantagepro2.link.open()
         logger.info(f"Acquiring data from {link} using vproweather")
-        vantagepro2 = VantagePro2.from_url(link)
-
-        if not hass_configured:
-            logger.info('Set weather station time to system time')
-            vantagepro2.settime(datetime.now())
-
         data = vantagepro2.get_current_data()
-        if vantagepro2.link:
-            vantagepro2.link.close()
     except Exception:
-        pass
+        logger.warning(f"Couldn't acquire data from {link}")
+    finally:
+        vantagepro2.link.close()
 
     if data:
-        if not client.is_connected():
-            try:
-                logger.info("Not connected to MQTT, connecting...")
-                client.connect(broker, port, keepalive=interval*3)
-                logger.info("Connected to MQTT")
-            except Exception as e:
-                logger.error("Connection to MQTT failed. Make sure broker, port, and user is defined correctly")
-                raise ValueError(f"Connection to MQTT failed: {e}")
-
         if new_sensor_used:
             correct_temperature(data)
         add_additional_info(data)
@@ -245,7 +252,10 @@ while True:
             hass_configured = True
 
         send_data_to_mqtt(client, data)
+        send_status_to_mqtt(client, 'OK')
         logger.info('Data sent to MQTT')
+    else:
+        send_status_to_mqtt(client, 'No data acquired')
 
     logger.info(f'Now waiting for {interval} seconds for next cycle')
     time.sleep(interval)

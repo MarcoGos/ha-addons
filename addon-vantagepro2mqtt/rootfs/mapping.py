@@ -5,6 +5,7 @@ MAPPING = {
         "topic": "DavisTime",
         "long_name": "Davis Time",
         "device_class": "timestamp",
+        "entity_category": "diagnostic",
         "icon": "mdi:clock",
         "correction": convert_to_iso_datetime
     },
@@ -224,6 +225,7 @@ MAPPING = {
         "topic": "BattVoltage",
         "unit_of_measure": "V",
         "device_class": "voltage",
+        "entity_category": "diagnostic",
         "long_name": "Battery Voltage",
         "correction": round_to_one_decimal
     },
@@ -321,4 +323,10 @@ MAPPING = {
         "conversion": convert_to_celcius,
         "has_correct_value": has_correct_value
     },
+    "Status": {
+        "topic": "Status",
+        "long_name": "Status",
+        "entity_category": "diagnostic",
+        "icon": "mdi:check-circle-outline"
+    }
 }

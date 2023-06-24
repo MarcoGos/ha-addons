@@ -45,3 +45,10 @@
 
 - Fixed error on closing link.
 - Added long term statistics.
+
+## 1.0.11
+
+- Finally fixed occasionally error on closing link.
+- Added Status sensor.
+- Better handling of sending payloads to MQTT.
+- Improved stability.
