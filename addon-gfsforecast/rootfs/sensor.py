@@ -93,7 +93,7 @@ class Sensor:
         }
         self.__send_data_to_ha()
 
-    def update_sensor_with_full_data(self, gfs_data: dict[str, Any], day_forecast: dict[date, Any]) -> None:
+    def update_sensor_with_full_data(self, gfs_data: dict[str, Any], day_forecast: dict[date, Any], detailed: bool) -> None:
         self.__restore_sensor_data()
         self._sensor_data['state'] = "Finished"
         self._sensor_data['attributes']['current'] = {
@@ -105,38 +105,38 @@ class Sensor:
         self._sensor_data['attributes']['loading'] = {}
         self._sensor_data['attributes']['forecast'] = []
         self._sensor_data['attributes']['detailed_forecast'] = []
+        if detailed:
+            for offset in gfs_data:
+                if offset == 'info':
+                    continue
+                data = gfs_data[offset]
+                dt = datetime.fromisoformat(gfs_data['info']['date'])
+                dt = datetime(dt.year, dt.month, dt.day, gfs_data['info']['pass'], 0, 0, 0)
+                dt += timedelta(hours = int(offset))
+                detailed_forecast: dict[str, Any] = {
+                    "datetime": dt.strftime('%Y-%m-%dT%H:00:00+00:00')
+                }
 
-        for offset in gfs_data:
-            if offset == 'info':
-                continue
-            data = gfs_data[offset]
-            dt = datetime.fromisoformat(gfs_data['info']['date'])
-            dt = datetime(dt.year, dt.month, dt.day, gfs_data['info']['pass'], 0, 0, 0)
-            dt += timedelta(hours = int(offset))
-            detailed_forecast: dict[str, Any] = {
-                "datetime": dt.strftime('%Y-%m-%dT%H:00:00+00:00')
-            }
+                windspeed, windangle = utils.get_wind_info(data['vwind'], data['uwind'])
+                detailed_forecast['windspeed'] = windspeed
+                detailed_forecast['windspeed_bft'] = utils.convert_ms_to_bft(windspeed)
+                detailed_forecast['windangle'] = windangle
+                detailed_forecast['windrose'] = utils.get_wind_rose(windangle)
+                detailed_forecast['gust'] = utils.ms_to_kmh(data['gust'])
+                detailed_forecast['temperature'] = data['tmp']
+                detailed_forecast['rain'] = data['rain']
+                detailed_forecast['pressure'] = round(data['pres'] / 100, 1)
+                detailed_forecast['visibility'] = round(data['vis'])
+                detailed_forecast['cldhigh'] = round(data['cldhigh'])
+                detailed_forecast['cldmid'] = round(data['cldmid'])
+                detailed_forecast['cldlow'] = round(data['cldlow'])
+                detailed_forecast['cldtotal'] = round(data['cldtotal'])
+                detailed_forecast['tmp500hpa'] = data['tmp500hpa']
+                detailed_forecast['cape'] = round(data['cape'])
+                detailed_forecast['liftedindex'] = round(data['liftedindex'])
+                detailed_forecast['offset'] = int(offset)
 
-            windspeed, windangle = utils.get_wind_info(data['vwind'], data['uwind'])
-            detailed_forecast['windspeed'] = windspeed
-            detailed_forecast['windspeed_bft'] = utils.convert_ms_to_bft(windspeed)
-            detailed_forecast['windangle'] = windangle
-            detailed_forecast['windrose'] = utils.get_wind_rose(windangle)
-            detailed_forecast['gust'] = utils.ms_to_kmh(data['gust'])
-            detailed_forecast['temperature'] = data['tmp']
-            detailed_forecast['rain'] = data['rain']
-            detailed_forecast['pressure'] = round(data['pres'] / 100, 1)
-            detailed_forecast['visibility'] = round(data['vis'])
-            detailed_forecast['cldhigh'] = round(data['cldhigh'])
-            detailed_forecast['cldmid'] = round(data['cldmid'])
-            detailed_forecast['cldlow'] = round(data['cldlow'])
-            detailed_forecast['cldtotal'] = round(data['cldtotal'])
-            detailed_forecast['tmp500hpa'] = data['tmp500hpa']
-            detailed_forecast['cape'] = round(data['cape'])
-            detailed_forecast['liftedindex'] = round(data['liftedindex'])
-            detailed_forecast['offset'] = int(offset)
-
-            self._sensor_data['attributes']['detailed_forecast'].append(detailed_forecast)
+                self._sensor_data['attributes']['detailed_forecast'].append(detailed_forecast)
 
         for gfs_date in day_forecast:
             if gfs_date > datetime.today().date():

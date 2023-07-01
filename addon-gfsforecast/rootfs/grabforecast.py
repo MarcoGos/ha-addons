@@ -9,10 +9,11 @@ import os
 
 log_level: str = 'info'
 max_offset: int = 168
+detailed: bool = False
 api_token: str = os.environ['SUPERVISOR_TOKEN'] if 'SUPERVISOR_TOKEN' in os.environ else ''
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "l:m:d",["log_level=", "max_offset"])
+    opts, args = getopt.getopt(sys.argv[1:], "l:m:d",["log_level=", "max_offset=", "detailed"])
 except getopt.GetoptError:
     print('grabforecast.py [-l <loglevel>][-m <maxoffset>][-d]')
     sys.exit(2)
@@ -21,6 +22,8 @@ for opt, arg in opts:
         log_level = arg
     if opt in ("-m", "--max_offset"):
         max_offset = int(arg)
+    if opt in ("-d", "--detailed"):
+        detailed = True
 
 logger.setLevel(log_levels[log_level])
 
@@ -73,7 +76,7 @@ while True:
 
             if (offset > max_offset) & data_found:
                 gfs_forecast.set_done()
-                sensor.update_sensor_with_full_data(gfs_forecast.get_data(), gfs_forecast.get_day_forecast())
+                sensor.update_sensor_with_full_data(gfs_forecast.get_data(), gfs_forecast.get_day_forecast(), detailed)
 
     logger.debug('Waiting 5 minutes to continue...')
     time.sleep(5 * 60)

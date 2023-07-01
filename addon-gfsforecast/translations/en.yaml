@@ -7,3 +7,6 @@ configuration:
   max_offset:
     name: Maximum offset
     description: GFS is calculated until 384 hours in advance. The offset is between 1 and 384 hours.
+  detailed:
+    name: Detailed forecast
+    description: Adds detailed forecast.

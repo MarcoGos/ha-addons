@@ -47,6 +47,7 @@ hass_configured = False
 log_level = 'notice'
 interval = 30
 new_sensor_used = False
+availability_topic = f"{discovery_prefix}/sensor/{prefix}/Status/state"
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], ":d:a:b:P:u:p:I:s:i:nl:k",["device=","address=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level=", "alt_windspeed_uom"])
@@ -83,7 +84,6 @@ for opt, arg in opts:
         alt_windspeed_uom = True
 
 metric_system = unit_system == 'Metric'
-# discovery_prefix = "homeassistant"
 
 logger.setLevel(log_levels[log_level])
 
@@ -108,21 +108,21 @@ if not broker:
     logger.error("Must define MQTT Broker in configuration!")
     exit(1)
 
-def send_config_to_mqtt(client: Any, data: Any) -> None:
-    send_config_entity_to_mqtt('Status')
-    for key, value in data.items():
-        if not key in MAPPING:
-            continue
-        if 'has_correct_value' in MAPPING[key]:
-            if not MAPPING[key]['has_correct_value'](value):
-                continue
-        send_config_entity_to_mqtt(key)
+def send_config_to_mqtt(client: Any, data: dict[str, Any]) -> None:
+    for key in MAPPING.keys():
+        if MAPPING[key].get('enable_by_data', False):
+            if key in data:
+                if 'has_correct_value' in MAPPING[key]:
+                    if not MAPPING[key]['has_correct_value'](data[key]):
+                        continue
+                send_config_entity_to_mqtt(key)
+        else:
+            send_config_entity_to_mqtt(key)
 
 def send_config_entity_to_mqtt(key: str):
     device_class = '' 
     state_class = ''
     unit_of_measure = ''
-    component = 'sensor'
     entity_category = ''
     icon = ''
     if 'unit_of_measure' in MAPPING[key]:
@@ -134,16 +134,11 @@ def send_config_entity_to_mqtt(key: str):
                 unit_of_measure = unit_of_measure['alt']
             else:
                 unit_of_measure = unit_of_measure['default']
-    if 'device_class' in MAPPING[key]:
-        device_class = MAPPING[key]['device_class']
-    if 'entity_category' in MAPPING[key]:
-        entity_category = MAPPING[key]['entity_category']
-    if 'state_class' in MAPPING[key]:
-        state_class = MAPPING[key]['state_class']
-    if 'icon' in MAPPING[key]:
-        icon = MAPPING[key]['icon']
-    if 'component' in MAPPING[key]:
-        component = MAPPING[key]['component']
+    device_class = MAPPING[key].get('device_class', '')
+    entity_category = MAPPING[key].get('entity_category', '')
+    state_class = MAPPING[key].get('state_class', '')
+    icon = MAPPING[key].get('icon', '')
+    component = MAPPING[key].get('component', 'sensor')
     config_payload = {}
     config_payload["~"] = f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}"
     config_payload["name"] = MAPPING[key]['long_name'] 
@@ -164,8 +159,10 @@ def send_config_entity_to_mqtt(key: str):
         config_payload["stat_cla"] = state_class
     if icon:
         config_payload['ic'] = icon
+    if MAPPING[key].get('availability', True):
+        config_payload['avty_t'] = availability_topic
     client.publish(f"{config_payload['~']}/config", json.dumps(config_payload), retain=True)
-    logger.debug(f"Sent config for sensor {config_payload['~']}")
+    logger.info(f"Sent config for sensor {config_payload['~']}")
 
 def send_data_to_mqtt(client: Any, data: dict[str, Any]):
     for key, value in data.items():
@@ -174,11 +171,7 @@ def send_data_to_mqtt(client: Any, data: dict[str, Any]):
         if 'has_correct_value' in MAPPING[key]:
             if not MAPPING[key]['has_correct_value'](value):
                 continue
-
-        if 'component' in MAPPING[key]:
-            component = MAPPING[key]['component']
-        else:
-            component = 'sensor'
+        component = MAPPING[key].get('component', 'sensor')
         if 'correction' in MAPPING[key]:
             value = MAPPING[key]['correction'](value)
         if metric_system and 'conversion' in MAPPING[key]:
@@ -192,9 +185,9 @@ def send_data_to_mqtt(client: Any, data: dict[str, Any]):
         logger.debug(f"{key}={value} (type={type(value)})")
         client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}/state", value, retain=True)
 
-def send_status_to_mqtt(client: Any, value: str):
-    component = 'sensor'
-    client.publish(f"{discovery_prefix}/{component}/{prefix}/Status/state", value, retain=True)
+def send_last_error_to_mqtt(client: Any, value: str):
+    component = MAPPING['LastError'].get('component', 'sensor')
+    client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING['LastError']['topic']}/state", value, retain=True)
 
 def add_additional_info(data: dict[str, Any]) -> None:
     data['HeatIndex'] = calc_heat_index(data['TempOut'], data['HumOut'])
@@ -216,6 +209,7 @@ if mqtt_user and mqtt_pass:
     logger.debug('Added MQTT user and password')
     client.username_pw_set(mqtt_user, mqtt_pass)
 logger.info("Connecting to MQTT broker")
+client.will_set(availability_topic, "offline", 0, True)
 client.connect(broker, port)
 client.loop_start()
 
@@ -226,12 +220,13 @@ else:
 
 logger.info("Connecting to weather station")
 vantagepro2 = VantagePro2.from_url(link)
-if not hass_configured:
-    logger.info('Set weather station time to system time')
-    vantagepro2.settime(datetime.now())
+logger.info('Set weather station time to system time')
+vantagepro2.settime(datetime.now())
+
+client.publish(availability_topic, "online", 0, True)
 
 while True:
-    data = None
+    data: dict[str, Any]
     try:
         vantagepro2.link.open()
         logger.info(f"Acquiring data from {link} using vproweather")
@@ -252,10 +247,10 @@ while True:
             hass_configured = True
 
         send_data_to_mqtt(client, data)
-        send_status_to_mqtt(client, 'OK')
         logger.info('Data sent to MQTT')
+        send_last_error_to_mqtt(client, 'No error')
     else:
-        send_status_to_mqtt(client, 'No data acquired')
+        send_last_error_to_mqtt(client, 'Couldn''t acquire data')
 
     logger.info(f'Now waiting for {interval} seconds for next cycle')
     time.sleep(interval)

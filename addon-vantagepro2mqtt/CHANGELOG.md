@@ -52,3 +52,8 @@
 - Added Status sensor.
 - Better handling of sending payloads to MQTT.
 - Improved stability.
+
+## 1.0.12
+
+- Added availability via LWT in MQTT.
+- Added Last Error.
