@@ -7,7 +7,8 @@ MAPPING = {
         "device_class": "timestamp",
         "entity_category": "diagnostic",
         "icon": "mdi:clock",
-        "correction": convert_to_iso_datetime
+        "correction": convert_to_iso_datetime,
+        "enable_by_data": True
     },
     "TempOut": {
         "topic": "OutsideTemp",
@@ -18,7 +19,8 @@ MAPPING = {
         "device_class": "temperature",
         "state_class": "measurement",
         "long_name": "Temperature (Outside)",
-        "conversion": convert_to_celcius
+        "conversion": convert_to_celcius,
+        "enable_by_data": True
     },
     "TempIn": {
         "topic": "InsideTemp",
@@ -29,7 +31,8 @@ MAPPING = {
         "device_class": "temperature",
         "state_class": "measurement",
         "long_name": "Temperature (Inside)",
-        "conversion": convert_to_celcius
+        "conversion": convert_to_celcius,
+        "enable_by_data": True
     },
     "HeatIndex": {
         "topic": "HeatIndex",
@@ -41,7 +44,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Heat Index",
         "icon": "mdi:sun-thermometer-outline",
-        "conversion": convert_to_celcius
+        "conversion": convert_to_celcius,
+        "enable_by_data": True
     },
     "WindChill": {
         "topic": "WindChill",
@@ -53,7 +57,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Wind Chill",
         "icon": "mdi:snowflake-thermometer",
-        "conversion": convert_to_celcius
+        "conversion": convert_to_celcius,
+        "enable_by_data": True
     },
     "FeelsLike": {
         "topic": "FeelsLike",
@@ -64,7 +69,8 @@ MAPPING = {
         "device_class": "temperature",
         "state_class": "measurement",
         "long_name": "Feels Like",
-        "conversion": convert_to_celcius
+        "conversion": convert_to_celcius,
+        "enable_by_data": True
     },
     "DewPoint": {
         "topic": "DewPoint",
@@ -76,7 +82,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Dew Point",
         "icon": "mdi:water-thermometer-outline",
-        "conversion": convert_to_celcius
+        "conversion": convert_to_celcius,
+        "enable_by_data": True
     },
     "Barometer": {
         "topic": "BaroCurr",
@@ -87,26 +94,30 @@ MAPPING = {
         "device_class": "pressure",
         "state_class": "measurement",
         "long_name": "Barometric Pressure",
-        "conversion": convert_to_mbar
+        "conversion": convert_to_mbar,
+        "enable_by_data": True
     },
     "BarTrend": {
         "topic": "BaroTrend",
         "long_name": "Barometric Trend",
-        "correction": get_baro_trend
+        "correction": get_baro_trend,
+        "enable_by_data": True
     },
     "HumIn": {
         "topic": "InsideHum",
         "unit_of_measure": "%",
         "device_class": "humidity",
         "state_class": "measurement",
-        "long_name": "Humidity (Inside)"
+        "long_name": "Humidity (Inside)",
+        "enable_by_data": True
     },
     "HumOut": {
         "topic": "OutsideHum",
         "unit_of_measure": "%",
         "device_class": "humidity", 
         "state_class": "measurement",
-        "long_name": "Humidity (Outside)"
+        "long_name": "Humidity (Outside)",
+        "enable_by_data": True
     },
     "WindSpeed": {
         "topic": "WindSpeed",
@@ -123,7 +134,8 @@ MAPPING = {
         "conversion": {
             "default": convert_to_kmh,
             "alt": convert_to_ms
-        }
+        },
+        "enable_by_data": True
     },
     "WindSpeed10Min": {
         "topic": "WindAvgSpeed",
@@ -140,25 +152,29 @@ MAPPING = {
         "conversion": {
             "default": convert_to_kmh,
             "alt": convert_to_ms
-        }
+        },
+        "enable_by_data": True
     },
     "WindDir": {
         "topic": "WindDir",
         "unit_of_measure": "°",
         "long_name": "Wind Direction",
         "icon": "mdi:compass-outline",
-        "state_class": "measurement"
+        "state_class": "measurement",
+        "enable_by_data": True
     },
     "WindDirRose": {
         "topic": "WindDirRose",
         "long_name": "Wind Direction Rose",
-        "icon": "mdi:compass-outline"
+        "icon": "mdi:compass-outline",
+        "enable_by_data": True
     },
     "WindSpeedBft": {
         "topic": "WindSpeedBft",
         "long_name": "Wind Speed (Bft)",
         "icon": "mdi:weather-windy",
         "state_class": "measurement",
+        "enable_by_data": True
     },
     "RainDay": {
         "topic": "DayRain",
@@ -169,7 +185,8 @@ MAPPING = {
         "icon": 'mdi:water',
         "long_name": "Rain (Day)",
         "state_class": "total_increasing",
-        "conversion": convert_to_mm
+        "conversion": convert_to_mm,
+        "enable_by_data": True
     },
     "RainMonth": {
         "topic": "MonthRain",
@@ -179,7 +196,8 @@ MAPPING = {
         },
         'icon': 'mdi:water',
         "long_name": "Rain (Month)",
-        "conversion": convert_to_mm
+        "conversion": convert_to_mm,
+        "enable_by_data": True
     },
     "RainYear": {
         "topic": "YearRain",
@@ -189,7 +207,8 @@ MAPPING = {
         },
         'icon': 'mdi:water',
         "long_name": "Rain (Year)",
-        "conversion": convert_to_mm
+        "conversion": convert_to_mm,
+        "enable_by_data": True
     },
     "RainRate": {
         "topic": "RainRate",
@@ -200,26 +219,30 @@ MAPPING = {
         "icon": "mdi:water",
         "state_class": "measurement",
         "long_name": "Rain Rate",
-        "conversion": convert_to_mm
+        "conversion": convert_to_mm,
+        "enable_by_data": True
     },
     "IsRaining": {
         "topic": "IsRaining",
         "long_name": "Is Raining",
-        "component": "binary_sensor"
+        "component": "binary_sensor",
+        "enable_by_data": True
     },
     "UV": {
         "topic": "UVLevel",
         "long_name": "UV Level",
         "icon": "mdi:sun-wireless-outline",
         "state_class": "measurement",
-        "correction": get_uv
+        "correction": get_uv,
+        "enable_by_data": True
     },
     "SolarRad": {
         "topic": "SolarRad",
         "long_name": "Solar Radiation",
         "icon": "mdi:sun-wireless-outline",
         "state_class": "measurement",
-        "correction": get_solar_rad
+        "correction": get_solar_rad,
+        "enable_by_data": True
     },
     "BatteryVolts": {
         "topic": "BattVoltage",
@@ -227,17 +250,20 @@ MAPPING = {
         "device_class": "voltage",
         "entity_category": "diagnostic",
         "long_name": "Battery Voltage",
-        "correction": round_to_one_decimal
+        "correction": round_to_one_decimal,
+        "enable_by_data": True
     },
     "ForecastIcon": {
         "topic": "ForeIcon",
-        "long_name": "Forecast Icon"
+        "long_name": "Forecast Icon",
+        "enable_by_data": True
     },
     "ForecastRuleNo": {
         "topic": "ForeRule",
         "long_name": "Forecast Rule",
         "icon": "mdi:binoculars",
-        "correction": get_forecast_string
+        "correction": get_forecast_string,
+        "enable_by_data": True
     },
     "ExtraTemps01": {
         "topic": "ExtraTemps01",
@@ -249,7 +275,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Extra Temperature 1",
         "conversion": convert_to_celcius,
-        "has_correct_value": has_correct_value
+        "has_correct_value": has_correct_value,
+        "enable_by_data": True
     },
     "ExtraTemps02": {
         "topic": "ExtraTemps02",
@@ -261,7 +288,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Extra Temperature 2",
         "conversion": convert_to_celcius,
-        "has_correct_value": has_correct_value
+        "has_correct_value": has_correct_value,
+        "enable_by_data": True
     },
     "ExtraTemps03": {
         "topic": "ExtraTemps03",
@@ -273,7 +301,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Extra Temperature 3",
         "conversion": convert_to_celcius,
-        "has_correct_value": has_correct_value
+        "has_correct_value": has_correct_value,
+        "enable_by_data": True
     },
     "ExtraTemps04": {
         "topic": "ExtraTemps04",
@@ -285,7 +314,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Extra Temperature 4",
         "conversion": convert_to_celcius,
-        "has_correct_value": has_correct_value
+        "has_correct_value": has_correct_value,
+        "enable_by_data": True
     },
     "ExtraTemps05": {
         "topic": "ExtraTemps05",
@@ -297,7 +327,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Extra Temperature 5",
         "conversion": convert_to_celcius,
-        "has_correct_value": has_correct_value
+        "has_correct_value": has_correct_value,
+        "enable_by_data": True
     },
     "ExtraTemps06": {
         "topic": "ExtraTemps06",
@@ -309,7 +340,8 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Extra Temperature 6",
         "conversion": convert_to_celcius,
-        "has_correct_value": has_correct_value
+        "has_correct_value": has_correct_value,
+        "enable_by_data": True
     },
     "ExtraTemps07": {
         "topic": "ExtraTemps07",
@@ -321,12 +353,20 @@ MAPPING = {
         "state_class": "measurement",
         "long_name": "Extra Temperature 7",
         "conversion": convert_to_celcius,
-        "has_correct_value": has_correct_value
+        "has_correct_value": has_correct_value,
+        "enable_by_data": True
     },
     "Status": {
         "topic": "Status",
         "long_name": "Status",
         "entity_category": "diagnostic",
-        "icon": "mdi:check-circle-outline"
+        "icon": "mdi:check-circle-outline",
+        "availability": False
+    },
+    "LastError": {
+        "topic": "LastError",
+        "long_name": "Last Error",
+        "entity_category": "diagnostic",
+        "icon": "mdi:message-alert-outline"
     }
 }
