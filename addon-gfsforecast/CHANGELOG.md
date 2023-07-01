@@ -12,3 +12,6 @@
 
 - Improved acquiring GPS position after reboot
 
+## 0.0.4
+
+- Added Detailed option
