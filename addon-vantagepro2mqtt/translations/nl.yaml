@@ -31,3 +31,6 @@ configuration:
   alt_windspeed_uom:
     name: "Alternatieve eenheid voor windsnelheid"
     description: "Gebruik m/s i.p.v. km/h voor windsnelheid (alleen bij gebruik van metrisch stelsel)."
+  windrose8:
+    name: "Windroos met 8 hoofdrichtingen"
+    description: "Gebruik 8 hoofdwindrichtingen in plaats van 16."

@@ -47,12 +47,13 @@ hass_configured = False
 log_level = 'notice'
 interval = 30
 new_sensor_used = False
+windrose8 = False
 availability_topic = f"{discovery_prefix}/sensor/{prefix}/Status/state"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], ":d:a:b:P:u:p:I:s:i:nl:k",["device=","address=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level=", "alt_windspeed_uom"])
+    opts, args = getopt.getopt(sys.argv[1:], ":d:a:b:P:u:p:I:s:i:nl:kw",["device=","address=","broker=","port=","user=","password=","prefix=","system=","interval=","new_sensor", "log_level=", "alt_windspeed_uom", "windrose8"])
 except getopt.GetoptError:
-    print('vantagepro2mqtt.py [-d <device>|-a <address>] -b <broker>[-P <port>][-u <user>][-p <password>][-I <prefix>][-s <system>][-i <interval][-l <loglevel>][-n][-k]')
+    print('vantagepro2mqtt.py [-d <device>|-a <address>] -b <broker>[-P <port>][-u <user>][-p <password>][-I <prefix>][-s <system>][-i <interval][-l <loglevel>][-n][-k][-w]')
     sys.exit(2)
 for opt, arg in opts:
     logger.debug(f"{opt}={arg}")
@@ -82,6 +83,8 @@ for opt, arg in opts:
         log_level = arg
     elif opt in ("-k", "--alt_windspeed_uom"):
         alt_windspeed_uom = True
+    elif opt in ("-w", "--windrose8"):
+        windrose8 = True
 
 metric_system = unit_system == 'Metric'
 
@@ -113,7 +116,8 @@ def send_config_to_mqtt(client: Any, data: dict[str, Any]) -> None:
         if MAPPING[key].get('enable_by_data', False):
             if key in data:
                 if 'has_correct_value' in MAPPING[key]:
-                    if not MAPPING[key]['has_correct_value'](data[key]):
+                    if not MAPPING[key]['has_correct_value'](data[key]): # type: ignore
+                        remove_config_of_entity(client, key)
                         continue
                 send_config_entity_to_mqtt(key)
         else:
@@ -128,12 +132,12 @@ def send_config_entity_to_mqtt(key: str):
     if 'unit_of_measure' in MAPPING[key]:
         unit_of_measure =  MAPPING[key]['unit_of_measure']
         if type(unit_of_measure) is dict:
-            unit_of_measure = unit_of_measure['metric' if metric_system else 'imperial']
+            unit_of_measure = unit_of_measure['metric' if metric_system else 'imperial'] # type: ignore
         if type(unit_of_measure) is dict:
-            if metric_system and alt_windspeed_uom and 'alt' in unit_of_measure:
-                unit_of_measure = unit_of_measure['alt']
+            if metric_system and alt_windspeed_uom and 'alt' in unit_of_measure: # type: ignore
+                unit_of_measure = unit_of_measure['alt'] # type: ignore
             else:
-                unit_of_measure = unit_of_measure['default']
+                unit_of_measure = unit_of_measure['default'] # type: ignore
     device_class = MAPPING[key].get('device_class', '')
     entity_category = MAPPING[key].get('entity_category', '')
     state_class = MAPPING[key].get('state_class', '')
@@ -142,7 +146,7 @@ def send_config_entity_to_mqtt(key: str):
     config_payload = {}
     config_payload["~"] = f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}"
     config_payload["name"] = MAPPING[key]['long_name'] 
-    config_payload["uniq_id"] = f"{prefix}_{MAPPING[key]['topic'].lower()}"
+    config_payload["uniq_id"] = f"{prefix}_{MAPPING[key]['topic'].lower()}" # type: ignore
     config_payload["stat_t"] = "~/state"
     config_payload['dev'] = { 
         "ids": [prefix], 
@@ -169,19 +173,19 @@ def send_data_to_mqtt(client: Any, data: dict[str, Any]):
         if not key in MAPPING:
             continue
         if 'has_correct_value' in MAPPING[key]:
-            if not MAPPING[key]['has_correct_value'](value):
+            if not MAPPING[key]['has_correct_value'](value): # type: ignore
                 continue
         component = MAPPING[key].get('component', 'sensor')
         if 'correction' in MAPPING[key]:
-            value = MAPPING[key]['correction'](value)
+            value = MAPPING[key]['correction'](value) # type: ignore
         if metric_system and 'conversion' in MAPPING[key]:
             conversion = MAPPING[key]['conversion']
             if type(conversion) is dict:
-                if alt_windspeed_uom and 'alt' in conversion:
-                    conversion = conversion['alt']
+                if alt_windspeed_uom and 'alt' in conversion: # type: ignore
+                    conversion = conversion['alt'] # type: ignore
                 else:
-                    conversion = conversion['default']
-            value = conversion(value)
+                    conversion = conversion['default'] # type: ignore
+            value = conversion(value) # type: ignore
         logger.debug(f"{key}={value} (type={type(value)})")
         client.publish(f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}/state", value, retain=True)
 
@@ -193,7 +197,7 @@ def add_additional_info(data: dict[str, Any]) -> None:
     data['HeatIndex'] = calc_heat_index(data['TempOut'], data['HumOut'])
     data['WindChill'] = calc_wind_chill(data['TempOut'], data['WindSpeed'])
     data['FeelsLike'] = calc_feels_like(data['TempOut'], data['HumOut'], data['WindSpeed'])
-    data['WindDirRose'] = get_wind_rose(data['WindDir'])
+    data['WindDirRose'] = get_wind_rose(data['WindDir'], windrose8)
     data['DewPoint'] = calc_dew_point(data['TempOut'], data['HumOut'])
     data['WindSpeedBft'] = convert_kmh_to_bft(convert_to_kmh(data['WindSpeed10Min']))
     data['IsRaining'] = "ON" if data['RainRate'] > 0 else "OFF"
@@ -201,6 +205,13 @@ def add_additional_info(data: dict[str, Any]) -> None:
 def correct_temperature(data: dict[str, Any]):
     if 'TempOut' in data:
         data['TempOut'] -= 0.9
+
+def remove_config_of_entity(client: Any, key: str):
+    component = MAPPING[key].get('component', 'sensor')
+    topic = f"{discovery_prefix}/{component}/{prefix}/{MAPPING[key]['topic']}"
+    client.publish(f"{topic}/config", "", 0, True)
+    client.publish(f"{topic}/state", "", 0, True)
+
 #
 # MAIN
 #
@@ -219,22 +230,22 @@ else:
     link = f'tcp:{address}'
 
 logger.info("Connecting to weather station")
-vantagepro2 = VantagePro2.from_url(link)
+vantagepro2 = VantagePro2.from_url(link) # type: ignore
 logger.info('Set weather station time to system time')
-vantagepro2.settime(datetime.now())
+vantagepro2.settime(datetime.now()) # type: ignore
 
 client.publish(availability_topic, "online", 0, True)
 
 while True:
-    data: dict[str, Any]
+    data: dict[str, Any] = {}
     try:
-        vantagepro2.link.open()
+        vantagepro2.link.open() # type: ignore
         logger.info(f"Acquiring data from {link} using vproweather")
         data = vantagepro2.get_current_data()
     except Exception:
         logger.warning(f"Couldn't acquire data from {link}")
     finally:
-        vantagepro2.link.close()
+        vantagepro2.link.close() # type: ignore
 
     if data:
         if new_sensor_used:

@@ -197,8 +197,8 @@ class GfsForecast():
     def find_latest_pass_info(self) -> bool:
         foundGfsDate = date.today()
         foundGfsPass = -1
-        counter = 0
-        while (counter < 2) & (foundGfsPass == -1):
+        counter = 1
+        while (counter >= 0) & (foundGfsPass == -1):
             for tryPass in [18, 12, 6, 0]:
                 url = self.__get_url(foundGfsDate, tryPass, self._max_offset)
                 response = requests.head(url)
@@ -208,9 +208,8 @@ class GfsForecast():
                     self._gfs_pass = foundGfsPass
                     self.logger.debug(f"Found {foundGfsDate} {foundGfsPass}")
                     return True
-            if foundGfsPass == -1:
-                counter -= 1
-                foundGfsDate += timedelta(days=-1)
+            counter -= 1
+            foundGfsDate += timedelta(days=-1)
         return False
 
     def init_offset(self, offset: int) -> None:
@@ -337,5 +336,7 @@ class GfsForecast():
             forecast[forecast_date]['chance_of_rain'] = round(forecast[forecast_date]['chance_of_rain'], -1)
             forecast[forecast_date]['chance_of_sun'] = round(forecast[forecast_date]['chance_of_sun'], -1)
             
-
         return forecast
+    
+    def is_key_needed(self, key: str, detailed: bool):
+        return not MAPPING[key].get('detailed', False) or detailed

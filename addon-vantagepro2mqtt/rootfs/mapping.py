@@ -234,7 +234,8 @@ MAPPING = {
         "icon": "mdi:sun-wireless-outline",
         "state_class": "measurement",
         "correction": get_uv,
-        "enable_by_data": True
+        "enable_by_data": True,
+        "has_correct_value": has_correct_value
     },
     "SolarRad": {
         "topic": "SolarRad",
@@ -242,7 +243,8 @@ MAPPING = {
         "icon": "mdi:sun-wireless-outline",
         "state_class": "measurement",
         "correction": get_solar_rad,
-        "enable_by_data": True
+        "enable_by_data": True,
+        "has_correct_value": has_correct_value
     },
     "BatteryVolts": {
         "topic": "BattVoltage",
