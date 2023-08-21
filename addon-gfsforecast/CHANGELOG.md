@@ -15,3 +15,7 @@
 ## 0.0.4
 
 - Added Detailed option
+
+## 0.0.5
+
+- Added unit of measure in HA sensor

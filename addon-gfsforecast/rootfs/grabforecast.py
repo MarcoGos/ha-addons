@@ -56,7 +56,7 @@ while True:
 
                 if not gfs_forecast.is_offset_done(offset):
                     for key in MAPPING:
-                        if not gfs_forecast.is_key_in_offset_done(offset, key):
+                        if not gfs_forecast.is_key_in_offset_done(offset, key) and gfs_forecast.is_key_needed(key, detailed):
                             value = gfs_forecast.get_value_from_grib_data(offset, key)
                             if value != None:
                                 logger.debug(f'Offset={offset} {key}={value}')    

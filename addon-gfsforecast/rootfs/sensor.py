@@ -2,6 +2,7 @@ import os
 import json
 from requests import get, post
 from datetime import datetime, timedelta, date
+from zoneinfo import ZoneInfo
 import utils
 import time
 from logger import logger
@@ -12,11 +13,15 @@ class Sensor:
     _api_url: str = 'http://supervisor/core/api'
     _sensor_data: dict[str, Any] = {}
     _sensor_file_path: str
+    _latitude: float
+    _longitude: float
+    _time_zone: str
 
     def __init__(self, api_token: str, entity_id: str) -> None:
         self._api_token = api_token
         self._entity_id = entity_id
         self._sensor_file_path: str = f'/data/{entity_id}.json'
+        self._get_HA_config()
 
     def __get_api_url(self) -> str:
         return f"{self._api_url}/states/{self._entity_id}"
@@ -102,6 +107,10 @@ class Sensor:
             'used_latitude': gfs_data['info']['used_latitude'],
             'used_longitude': gfs_data['info']['used_longitude']
         }
+        self._sensor_data['attributes']['pressure_unit'] = 'hPa'
+        self._sensor_data['attributes']['wind_speed_unit'] = 'm/s'
+        self._sensor_data['attributes']['precipitation_unit'] = 'mm'
+        self._sensor_data['attributes']['temperature_unit'] = '°C'
         self._sensor_data['attributes']['loading'] = {}
         self._sensor_data['attributes']['forecast'] = []
         self._sensor_data['attributes']['detailed_forecast'] = []
@@ -111,10 +120,10 @@ class Sensor:
                     continue
                 data = gfs_data[offset]
                 dt = datetime.fromisoformat(gfs_data['info']['date'])
-                dt = datetime(dt.year, dt.month, dt.day, gfs_data['info']['pass'], 0, 0, 0)
+                dt = datetime(dt.year, dt.month, dt.day, gfs_data['info']['pass'], 0, 0, 0, tzinfo=ZoneInfo(self._time_zone))
                 dt += timedelta(hours = int(offset))
                 detailed_forecast: dict[str, Any] = {
-                    "datetime": dt.strftime('%Y-%m-%dT%H:00:00+00:00')
+                    "datetime": dt.isoformat()
                 }
 
                 windspeed, windangle = utils.get_wind_info(data['vwind'], data['uwind'])
@@ -146,7 +155,8 @@ class Sensor:
 
     def __get_sensor_forecast(self, day_forecast: dict[str, Any], gfs_date: date) -> dict[str, Any]:
         sensor_forecast: dict[str, Any] = {}
-        sensor_forecast['datetime'] = gfs_date.strftime('%Y-%m-%dT00:00:00+00:00')
+        dt = datetime.combine(gfs_date, datetime.min.time(), tzinfo=ZoneInfo(self._time_zone))
+        sensor_forecast['datetime'] = dt.isoformat()
         sensor_forecast['condition'] = \
             utils.get_condition(day_forecast['chance_of_sun'], day_forecast['rain'], day_forecast['min_temperature_daytime'])
         if day_forecast['temperature_max'] > -999:
@@ -163,6 +173,9 @@ class Sensor:
         return sensor_forecast
 
     def get_gps_position(self) -> tuple[float, float]:
+        return self._latitude, self._longitude
+
+    def _get_HA_config(self):
         url = f'{self._api_url}/config'
         headers = self.__get_api_headers()
         count = 0
@@ -171,8 +184,11 @@ class Sensor:
             if response.status_code in [200, 201]:
                 data = json.loads(response.text)
                 logger.info(f'Found gps location {data["latitude"]} {data["longitude"]}')
-                return data['latitude'], data['longitude']
+                self._latitude = data["latitude"]
+                self._longitude = data["longitude"]
+                self._time_zone = data["time_zone"]
+                return
             else:
                 time.sleep(1)
             count += 1
-        raise ValueError('Could not acquire gps location')
+        raise ValueError('Could not acquire HA config')

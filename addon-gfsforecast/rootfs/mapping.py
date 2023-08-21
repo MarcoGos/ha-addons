@@ -11,17 +11,20 @@ MAPPING: dict[str, dict[str, Any]] = {
     },
     'gust': {
         'code': 'GUST', 
-        'layer': 'surface'
+        'layer': 'surface',
+        'detailed': True
     },
     'tmin': {
         'code': 'TMIN', 
         'layer': '2 m above ground',
-        'correction': -273
+        'correction': -273,
+        'detailed': True
     },
     'tmax': {
         'code': 'TMAX', 
         'layer': '2 m above ground',
-        'correction': -273
+        'correction': -273,
+        'detailed': True
     },
     'tmp': {
         'code': 'TMP', 
@@ -31,17 +34,14 @@ MAPPING: dict[str, dict[str, Any]] = {
     'tsfc': {
         'code': 'TMP', 
         'layer': 'surface',
-        'correction': -273
+        'correction': -273,
+        'detailed': True
     },
-    # 'tmp850hpa': {
-    #     'code': 'TMP', 
-    #     'layer': '850 mb',
-    #     'correction': -273
-    # },
     'tmp500hpa': {
         'code': 'TMP', 
         'layer': '500 mb',
-        'correction': -273
+        'correction': -273,
+        'detailed': True
     },
     'cldhigh': {
         'code': 'HCDC', 
@@ -49,7 +49,8 @@ MAPPING: dict[str, dict[str, Any]] = {
     },
     'cldmid': {
         'code': 'MCDC', 
-        'layer': 'middle cloud layer'
+        'layer': 'middle cloud layer',
+        'detailed': True
     },
     'cldlow': {
         'code': 'LCDC', 
@@ -65,26 +66,27 @@ MAPPING: dict[str, dict[str, Any]] = {
     },
     'humidity': {
         'code': 'RH', 
-        'layer': '2 m above ground'
+        'layer': '2 m above ground',
+        'detailed': True
     },
     'cape': {
         'code': 'CAPE', 
-        'layer': 'surface'
+        'layer': 'surface',
+        'detailed': True
     },
     'liftedindex': {
         'code': '4LFTX',
-        'layer': 'surface'
+        'layer': 'surface',
+        'detailed': True
     },
     'pres': {
         'code': 'PRES', 
-        'layer': 'surface'
+        'layer': 'surface',
+        'detailed': True
     },        
     'vis': {
         'code': 'VIS', 
-        'layer': 'surface'
+        'layer': 'surface',
+        'detailed': True
     }
 }
-
-# def get_inventory_key_from_mapping(key: str) -> str:
-#     if key in MAPPING:
-#         return '{}:{}'.format(MAPPING[key]['code'], MAPPING[key]['layer'])
