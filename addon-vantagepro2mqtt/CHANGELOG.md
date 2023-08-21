@@ -57,3 +57,8 @@
 
 - Added availability via LWT in MQTT.
 - Added Last Error.
+
+## 1.0.13
+
+- Added option to use 8 cardinal directions for wind instead of 16.
+- Suppress UV Level and Solar Radiation sensor if value is unavailable.

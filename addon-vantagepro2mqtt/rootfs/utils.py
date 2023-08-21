@@ -330,42 +330,17 @@ def calc_feels_like(temperature_f: float, humidity: float, windspeed_mph: float)
 def convert_to_iso_datetime(value: datetime) -> str:
     return value.strftime('%Y-%m-%dT%H:%M:%S' + strftime('%z'))
 
-def get_wind_rose(bearing: int) -> str:
-    if bearing >= 347 and bearing < 12:
-        return "N"
-    elif bearing >= 12 and bearing < 34:
-        return "NNE"
-    elif bearing >= 34 and bearing < 57:
-        return "NE"
-    elif bearing >= 57 and bearing < 79:
-        return "ENE"
-    elif bearing >= 79 and bearing < 102:
-        return "E"
-    elif bearing >= 102 and bearing < 124:
-        return "ESE"
-    elif bearing >= 124 and bearing < 147:
-        return "SE"
-    elif bearing >= 147 and bearing < 170:
-        return "SSE"
-    elif bearing >= 170 and bearing < 192:
-        return "S"
-    elif bearing >= 192 and bearing < 214:
-        return "SSW"
-    elif bearing >= 214 and bearing < 237:
-        return "SW"
-    elif bearing >= 237 and bearing < 259:
-        return "WSW"
-    elif bearing >= 259 and bearing < 280:
-        return "W"
-    elif bearing >= 280 and bearing < 303:
-        return "WNW"
-    elif bearing >= 303 and bearing < 347:
-        return "NW"
+def get_wind_rose(bearing: int, windrose8: bool) -> str:
+    directions = [ 'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+               'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW' ]
+    if windrose8:
+        index = (round(bearing / 45) % 8) * 2
     else:
-        return "NNW"
+        index = round(bearing / 22.5) % 16
+    return directions[index]
 
 def has_correct_value(value: float) -> bool:
-    return value != 255
+    return value != 255 and value != 32767
 
 def round_to_one_decimal(value: float) -> float:
     return round(value, 1)
@@ -389,15 +364,15 @@ def get_forecast_string(wrule: int) -> str:
         wrule = 194
     return ForecastStrings[wrule]
 
-def get_uv(value: int) -> Any:
+def get_uv(value: int) -> float|bool:
     if value == 255:
-        return 'n/a'
+        return False
     else:
         return value
 
-def get_solar_rad(value: int) -> Any:
+def get_solar_rad(value: int) -> float|bool:
     if value == 32767:
-        return 'n/a'
+        return false
     else:
         return value
 

@@ -2,7 +2,7 @@ name: "Vantage Pro to MQTT"
 description: >-
   Vantage Pro Weather to MQTT gateway. Using the pyvantagepro library
 url: https://github.com/MarcoGos/ha-addons
-version: "1.0.12"
+version: "1.0.13"
 slug: vantagepro2mqtt
 arch:
   - aarch64
@@ -24,6 +24,7 @@ schema:
   unit_system: "list(Imperial|Metric)"
   alt_windspeed_uom: "bool?"
   new_sensor_used: "bool"
+  windrose8: "bool?"
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   mqtt_host: "str?"
   mqtt_port: "port?"

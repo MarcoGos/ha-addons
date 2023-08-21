@@ -30,7 +30,7 @@ UNIT_SYSTEM=$(bashio::config "unit_system")
 LOG_LEVEL=$(bashio::config "log_level")
 DISCOVERY_PREFIX=$(bashio::config "discovery_prefix" "homeassistant")
 ALT_WINDSPEED_UOM=$(bashio::config "alt_windspeed_uom")
-
+WINDROSE8=$(bashio::config "windrose8")
 ARGS=""
 if [ "${DEVICE}" != "" ]; then
     ARGS+=" -d ${DEVICE}"
@@ -51,6 +51,9 @@ if [ "$NEW_SENSOR_USED" = true ]; then
 fi
 if [ "$ALT_WINDSPEED_UOM" = true ]; then
     ARGS+=" -k"
+fi
+if [ "$WINDROSE8" = true ]; then
+    ARGS+=" -w"
 fi
 
 bashio::log.info "$ARGS"

@@ -31,3 +31,6 @@ configuration:
   alt_windspeed_uom:
     name: "Alternative windspeed unit of measure"
     description: "Use m/s instead of km/h for windspeed (only applies to metric system)."
+  windrose8:
+    name: "Windrose with 8 cardinal directions"
+    description: "Use 8 cardinal wind directions instead of 16."
