@@ -16,11 +16,13 @@ class Sensor:
     _latitude: float
     _longitude: float
     _time_zone: str
+    _metric_system: bool
 
-    def __init__(self, api_token: str, entity_id: str) -> None:
+    def __init__(self, api_token: str, entity_id: str, unit_system: str) -> None:
         self._api_token = api_token
         self._entity_id = entity_id
         self._sensor_file_path: str = f'/data/{entity_id}.json'
+        self._metric_system = unit_system == 'Metric'
         self._get_HA_config()
 
     def __get_api_url(self) -> str:
@@ -107,13 +109,20 @@ class Sensor:
             'used_latitude': gfs_data['info']['used_latitude'],
             'used_longitude': gfs_data['info']['used_longitude']
         }
-        self._sensor_data['attributes']['pressure_unit'] = 'hPa'
-        self._sensor_data['attributes']['wind_speed_unit'] = 'm/s'
-        self._sensor_data['attributes']['precipitation_unit'] = 'mm'
-        self._sensor_data['attributes']['temperature_unit'] = '°C'
+        if self._metric_system:
+            self._sensor_data['attributes']['pressure_unit'] = 'hPa'
+            self._sensor_data['attributes']['wind_speed_unit'] = 'm/s'
+            self._sensor_data['attributes']['precipitation_unit'] = 'mm'
+            self._sensor_data['attributes']['temperature_unit'] = '°C'
+        else:
+            self._sensor_data['attributes']['pressure_unit'] = 'inHg'
+            self._sensor_data['attributes']['wind_speed_unit'] = 'mph'
+            self._sensor_data['attributes']['precipitation_unit'] = 'inch'
+            self._sensor_data['attributes']['temperature_unit'] = '°F'
         self._sensor_data['attributes']['loading'] = {}
         self._sensor_data['attributes']['forecast'] = []
         self._sensor_data['attributes']['detailed_forecast'] = []
+        self._sensor_data['attributes']['last_updated'] = datetime.now(tz=ZoneInfo(self._time_zone)).isoformat()
         if detailed:
             for offset in gfs_data:
                 if offset == 'info':
@@ -126,9 +135,10 @@ class Sensor:
                     "datetime": dt.isoformat()
                 }
 
-                windspeed, windangle = utils.get_wind_info(data['vwind'], data['uwind'])
+                windspeed, windangle = utils.get_wind_info(data['vwind'], data['uwind'], self._metric_system)
                 detailed_forecast['windspeed'] = windspeed
-                detailed_forecast['windspeed_bft'] = utils.convert_ms_to_bft(windspeed)
+                if self._metric_system:
+                    detailed_forecast['windspeed_bft'] = utils.convert_ms_to_bft(windspeed)
                 detailed_forecast['windangle'] = windangle
                 detailed_forecast['windrose'] = utils.get_wind_rose(windangle)
                 detailed_forecast['gust'] = utils.ms_to_kmh(data['gust'])
@@ -165,7 +175,8 @@ class Sensor:
             sensor_forecast['templow'] = round(day_forecast['temperature_min'])
         sensor_forecast['precipitation'] = round(day_forecast['rain'])
         sensor_forecast['wind_speed'] = day_forecast['windspeed']
-        sensor_forecast['wind_speed_bft'] = utils.convert_ms_to_bft(day_forecast['windspeed'])
+        if self._metric_system:
+            sensor_forecast['wind_speed_bft'] = utils.convert_ms_to_bft(day_forecast['windspeed'])
         sensor_forecast['wind_rose'] = utils.get_wind_rose(day_forecast['windangle'])
         sensor_forecast['wind_bearing'] = round(day_forecast['windangle'])
         sensor_forecast['chance_of_sun'] = round(day_forecast['chance_of_sun'])
