@@ -18,11 +18,13 @@ class GfsForecast():
     _gfs_pass: int
     _max_offset: int
     _data: dict[str, Any]
+    _metric_system: bool
 
-    def __init__(self, logger: Logger, latitude: float, longitude: float, max_offset: int):
+    def __init__(self, logger: Logger, latitude: float, longitude: float, max_offset: int, unit_system: str):
         self.logger = logger
         self._latitude, self._longitude = latitude, longitude
         self._max_offset = max_offset
+        self._metric_system = unit_system == 'Metric'
         self.find_latest_pass_info()
 
     def __get_url(self, gfs_date: date, gfs_pass: int, offset: int, inventory: bool = False) -> str:
@@ -39,12 +41,18 @@ class GfsForecast():
 
     def __get_inventory_by_url(self, url: str) -> bool:
         self._inventory = {}
-        response = requests.head(url)
+        try:
+            response = requests.head(url, timeout=10)
+        except requests.exceptions.Timeout:
+            Logger.warning('Got a timeout getting info from the inventory.')
         if not response.ok:
             return False
         tries = 0
         while tries < 3:
-            response = requests.get(url)
+            try:
+                response = requests.get(url, timeout=10)
+            except requests.exceptions.Timeout:
+                Logger.warning('Got a timeout when getting the inventory.')
             if response.status_code != 200 | (len(response.content) < 20000):
                 time.sleep(2)
                 tries += 1
@@ -110,7 +118,7 @@ class GfsForecast():
         while tries < 3:
             self.logger.debug(f'Download {url}, try {tries +1}')
             try:
-                response = requests.get(url, headers=headers)
+                response = requests.get(url, headers=headers, timeout=10)
                 size = end - start +1
                 if (response.status_code == 206) & response.content.startswith(b'GRIB') & (len(response.content) == size): 
                     gribfile = './tmp.grib'
@@ -147,6 +155,16 @@ class GfsForecast():
             gribfile = self.__get_part_of_grib(url, invPart['start'], invPart['end'])
             if gribfile != '':
                 value = self.__read_value(gribfile, MAPPING[key].get('correction', 0))
+                if not self._metric_system:
+                    unit_of_measure = MAPPING[key].get('unit_of_measure', '')
+                    if unit_of_measure == '°C':
+                        value = round(utils.convert_celcius_to_fahrenheit(value), 1)
+                    elif unit_of_measure == 'mm':
+                        value = round(utils.convert_mm_to_inch(value), 1)
+                    elif unit_of_measure == 'hPa':
+                        value = round(utils.convert_hPa_to_inchHg(value), 1)
+                    elif unit_of_measure == 'm/s':
+                        value = round(utils.convert_ms_to_mph(value), 1)
                 os.remove(gribfile)
                 return value
         else:
@@ -201,7 +219,10 @@ class GfsForecast():
         while (counter >= 0) & (foundGfsPass == -1):
             for tryPass in [18, 12, 6, 0]:
                 url = self.__get_url(foundGfsDate, tryPass, self._max_offset)
-                response = requests.head(url)
+                try:
+                    response = requests.head(url, timeout=10)
+                except requests.exceptions.Timeout:
+                    Logger.warning('Got a timeout on getting the lastest pass info')
                 if response.ok:
                     foundGfsPass = tryPass
                     self._gfs_date = foundGfsDate
@@ -324,13 +345,13 @@ class GfsForecast():
 
                 forecast[dt.date()]['vwind'] += day_data['vwind']
                 forecast[dt.date()]['uwind'] += day_data['uwind']
-                windspeed,_ = utils.get_wind_info(day_data['vwind'], day_data['uwind'])
+                windspeed,_ = utils.get_wind_info(day_data['vwind'], day_data['uwind'], self._metric_system)
                 forecast[dt.date()]['windspeed'] = max(forecast[dt.date()]['windspeed'], windspeed)
             else:
                 forecast[dt.date()]['temperature_min'] = min(forecast[dt.date()]['temperature_min'], day_data['tmp'])
 
         for forecast_date in forecast:
-            _,windangle = utils.get_wind_info(forecast[forecast_date]['vwind'], forecast[forecast_date]['uwind'])
+            _,windangle = utils.get_wind_info(forecast[forecast_date]['vwind'], forecast[forecast_date]['uwind'], self._metric_system)
             forecast[forecast_date]['windangle'] = windangle
             forecast[forecast_date]['chance_of_rain'] = min(forecast[forecast_date]['chance_of_rain'], 90)
             forecast[forecast_date]['chance_of_rain'] = round(forecast[forecast_date]['chance_of_rain'], -1)

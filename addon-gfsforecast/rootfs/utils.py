@@ -1,9 +1,12 @@
 import math
 from mapping import *
 
-def get_wind_info(vwind: float, uwind: float) -> tuple[float, int]:
+def get_wind_info(vwind: float, uwind: float, metric_system: bool) -> tuple[float, int]:
     windangle = int((270 - math.atan2(vwind, uwind) * 180 / math.pi) % 360)
-    windspeed = round(math.sqrt(vwind * vwind + uwind * uwind), 1)
+    windspeed = math.sqrt(vwind * vwind + uwind * uwind)
+    if not metric_system:
+        windspeed = convert_ms_to_mph(windspeed)
+    windspeed = round(windspeed, 1)
     return windspeed, windangle
 
 def convert_ms_to_bft(windspeed: float) -> int:
@@ -59,3 +62,15 @@ def get_condition(chance_of_sun: int, rain: float, temperature_min: float) -> st
         elif  chance_of_sun <= 80:
             return 'partlycloudy'
     return 'sunny'
+
+def convert_celcius_to_fahrenheit(value_c: float) -> float:
+    return round(value_c * 1.8 + 32, 1)
+
+def convert_mm_to_inch(value: float) -> float:
+    return value / 25.4
+
+def convert_hPa_to_inchHg(value: float) -> float:
+    return value * 0.0295
+
+def convert_ms_to_mph(value: float) -> float:
+    return value * 2.23694
