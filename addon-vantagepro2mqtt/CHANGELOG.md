@@ -62,3 +62,7 @@
 
 - Added option to use 8 cardinal directions for wind instead of 16.
 - Suppress UV Level and Solar Radiation sensor if value is unavailable.
+
+## 1.0.14
+
+- Corrected UV value (was 10 times higher).
