@@ -251,7 +251,7 @@ def convert_ms_to_bft(windspeed: float) -> int:
 def convert_kmh_to_bft(windspeed_kmh: float) -> int:
     return convert_ms_to_bft(convert_kmh_to_ms(windspeed_kmh))
 
-def contains_correct_data(json_data: dict):
+def contains_correct_data(json_data: dict[str, Any]) -> None:
     return json_data['OutsideTemp']['value'] < 60 \
         and json_data['RainRate']['value'] < 1000 \
         and json_data['WindSpeed']['value'] < 40 \
@@ -364,15 +364,15 @@ def get_forecast_string(wrule: int) -> str:
         wrule = 194
     return ForecastStrings[wrule]
 
-def get_uv(value: int) -> float|bool:
+def get_uv(value: int) -> int|bool:
     if value == 255:
         return False
     else:
-        return value
+        return round(value / 10)
 
 def get_solar_rad(value: int) -> float|bool:
     if value == 32767:
-        return false
+        return False
     else:
         return value
 

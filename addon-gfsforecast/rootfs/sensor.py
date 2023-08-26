@@ -57,6 +57,7 @@ class Sensor:
         else:
             self._sensor_data = {
                 "state": "",
+                "name": "GFS forecast",
                 "attributes": {
                     "icon": "mdi:weather-partly-cloudy",
                     "friendly_name": "GFS forecast",
@@ -121,9 +122,9 @@ class Sensor:
             self._sensor_data['attributes']['temperature_unit'] = '°F'
         self._sensor_data['attributes']['loading'] = {}
         self._sensor_data['attributes']['forecast'] = []
-        self._sensor_data['attributes']['detailed_forecast'] = []
         self._sensor_data['attributes']['last_updated'] = datetime.now(tz=ZoneInfo(self._time_zone)).isoformat()
         if detailed:
+            self._sensor_data['attributes']['detailed_forecast'] = []
             for offset in gfs_data:
                 if offset == 'info':
                     continue

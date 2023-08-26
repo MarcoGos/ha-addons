@@ -2,7 +2,7 @@ name: "GFS forecast"
 description: >-
   This addon grabs GFS information from the NOAA NOMADS server
 url: https://github.com/MarcoGos/ha-addons
-version: "0.0.6"
+version: "0.0.7"
 slug: gfsforecast
 arch:
   - aarch64
@@ -15,7 +15,7 @@ apparmor: true
 stdin: true
 options:
   log_level: info
-  max_offset: 168
+  max_offset: 192
   unit_system: Metric
 schema:
   log_level: list(debug|info|warning|error|fatal|critical)?

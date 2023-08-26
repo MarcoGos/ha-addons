@@ -25,7 +25,6 @@ class GfsForecast():
         self._latitude, self._longitude = latitude, longitude
         self._max_offset = max_offset
         self._metric_system = unit_system == 'Metric'
-        self.find_latest_pass_info()
 
     def __get_url(self, gfs_date: date, gfs_pass: int, offset: int, inventory: bool = False) -> str:
         url_tempate = 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{}/{}/atmos/gfs.t{}z.pgrb2.0p25.f{}'
@@ -43,16 +42,19 @@ class GfsForecast():
         self._inventory = {}
         try:
             response = requests.head(url, timeout=10)
+            if not response.ok:
+                return False
         except requests.exceptions.Timeout:
-            Logger.warning('Got a timeout getting info from the inventory.')
-        if not response.ok:
+            self.logger.warning('Got a timeout getting info from the inventory.')
             return False
+        
         tries = 0
         while tries < 3:
             try:
                 response = requests.get(url, timeout=10)
             except requests.exceptions.Timeout:
-                Logger.warning('Got a timeout when getting the inventory.')
+                self.logger.warning('Got a timeout when getting the inventory.')
+
             if response.status_code != 200 | (len(response.content) < 20000):
                 time.sleep(2)
                 tries += 1
@@ -221,14 +223,14 @@ class GfsForecast():
                 url = self.__get_url(foundGfsDate, tryPass, self._max_offset)
                 try:
                     response = requests.head(url, timeout=10)
+                    if response.ok:
+                        foundGfsPass = tryPass
+                        self._gfs_date = foundGfsDate
+                        self._gfs_pass = foundGfsPass
+                        self.logger.debug(f"Found {foundGfsDate} {foundGfsPass}")
+                        return True
                 except requests.exceptions.Timeout:
-                    Logger.warning('Got a timeout on getting the lastest pass info')
-                if response.ok:
-                    foundGfsPass = tryPass
-                    self._gfs_date = foundGfsDate
-                    self._gfs_pass = foundGfsPass
-                    self.logger.debug(f"Found {foundGfsDate} {foundGfsPass}")
-                    return True
+                    self.logger.warning('Got a timeout on getting the lastest pass info')
             counter -= 1
             foundGfsDate += timedelta(days=-1)
         return False

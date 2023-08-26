@@ -12,6 +12,7 @@ max_offset: int = 168
 detailed: bool = False
 api_token: str = os.environ['SUPERVISOR_TOKEN'] if 'SUPERVISOR_TOKEN' in os.environ else ''
 unit_system = "Metric"
+scan_interval: int = 5
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "l:m:ds:",["log_level=", "max_offset=", "detailed", "system="])
@@ -66,20 +67,23 @@ while True:
                             if value != None:
                                 logger.debug(f'Offset={offset} {key}={value}')    
                                 gfs_forecast.store_data_value(offset, key, value)
-                                data_found = True
                             else:
                                 logger.error(f'No data found for key {key} offset {offset}...')
                                 data_found = False
                                 break
                     if data_found:
                         gfs_forecast.set_offset_to_done(offset)
-                    gfs_forecast.store_data()
 
                 offset += step
 
-            if (offset > max_offset) & data_found:
+            if (offset > max_offset):
                 gfs_forecast.set_done()
                 sensor.update_sensor_with_full_data(gfs_forecast.get_data(), gfs_forecast.get_day_forecast(), detailed)
 
-    logger.debug('Waiting 5 minutes to continue...')
-    time.sleep(5 * 60)
+            gfs_forecast.store_data()
+
+        else:
+            logger.debug('No new GFS pass found (yet)...')
+
+    logger.debug(f'Waiting {scan_interval} minutes to continue...')
+    time.sleep(scan_interval * 60)
