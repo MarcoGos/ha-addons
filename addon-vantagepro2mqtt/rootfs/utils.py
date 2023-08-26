@@ -364,11 +364,11 @@ def get_forecast_string(wrule: int) -> str:
         wrule = 194
     return ForecastStrings[wrule]
 
-def get_uv(value: int) -> int|bool:
+def get_uv(value: int) -> float|bool:
     if value == 255:
         return False
     else:
-        return round(value / 10)
+        return round(value / 10, 1)
 
 def get_solar_rad(value: int) -> float|bool:
     if value == 32767:
