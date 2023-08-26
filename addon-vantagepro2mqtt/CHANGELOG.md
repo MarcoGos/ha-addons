@@ -66,3 +66,7 @@
 ## 1.0.14
 
 - Corrected UV value (was 10 times higher).
+
+## 1.0.15
+
+- Made UV value a floating point value instead of an integer.
