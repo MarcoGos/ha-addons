@@ -20,8 +20,12 @@
 
 - Added unit of measure in HA sensor
 
-## 0.0.06
+## 0.0.6
 
 - Added last updated sensor
 - Added option to choose between metric and imperial system
 - Improved timeouts
+
+## 0.0.7
+
+- Improved stability
