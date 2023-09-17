@@ -14,8 +14,9 @@ The add-on is installed like any other:
 4. Click <kbd>Install</kbd> and give it a few minutes to finish downloading.
 5. Configure at **Configuration** tab or separate file in [**Configuration folder**](https://www.home-assistant.io/getting-started/configuration/) according to the instructions of the selected add-on:
 
-- [vproweather2mqtt](./addon-vproweather2mqtt)
-- [gfsforecast](./addon-gfsforecast)
+- [Vantage Pro to MQTT](./addon-vantagepro2mqtt)
+- [GFS Weather Forecast](./addon-gfs_weather_forecast/)
+- [GFS Forecast](./addon-gfsforecast) (DEPRECATED, use the GFS Weather Forecast addon)
 
 6. Click <kbd>Start</kbd>, give it a few seconds to spin up.
 7. Enjoy.
