@@ -1,0 +1,26 @@
+name: "GFS Weather Forecast"
+description: >-
+  This addon grabs the GFS weather forecast modal data from the NOAA NOMADS server. The addon works in conjunction with the GFS Weather Forecast integration
+url: https://github.com/MarcoGos/ha-addons
+version: "1.0.0"
+slug: gfsweatherforecast
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+homeassistant_api: true
+apparmor: true
+options:
+  log_level: info
+  max_offset: 192
+schema:
+  log_level: list(debug|info|warning|error|fatal|critical)?
+  max_offset: int(1,384)
+init: false
+ports:
+  8000/tcp: 8000
+ports_description:
+  8000/tcp: Port for API calls, used by the GFS weather forecast integration
+image: "marcogos/{arch}-addon-gfs_weather_forecast"
