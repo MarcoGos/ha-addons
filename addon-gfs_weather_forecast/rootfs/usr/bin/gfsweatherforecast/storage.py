@@ -6,6 +6,7 @@ from const import store_directory
 
 class Storage:
     _state: str
+    _used_latitude_longitude: str = ""
     _current: dict[str, Any] = {}
     _loading: dict[str, Any] = {}
     _gfs_pass: int
@@ -33,15 +34,16 @@ class Storage:
         self._loading = {}
         self._current = {
             'date': gfs_data['info']['date'],
-            'pass': gfs_data['info']['pass'],
-            'used_latitude_longitude': f"{gfs_data['info']['used_latitude']}, {gfs_data['info']['used_longitude']}"
+            'pass': gfs_data['info']['pass']
         }
         self._state = "Finished"
+        self._used_latitude_longitude = f"{gfs_data['info']['used_latitude']}, {gfs_data['info']['used_longitude']}"
         self._store_status()
 
     def _store_status(self):
-        status_data = {
+        status_data: dict[str, Any] = {
             "status": self._state,
+            "used_latitude_longitude": self._used_latitude_longitude,
             "current": self._current,
             "loading": self._loading
         }

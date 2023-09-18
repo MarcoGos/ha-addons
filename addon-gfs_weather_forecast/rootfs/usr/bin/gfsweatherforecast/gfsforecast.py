@@ -9,6 +9,7 @@ import json
 from logging import Logger
 import utils
 from const import store_directory
+from zoneinfo import ZoneInfo
 
 class GfsForecast():
     _inventory: dict[str, Any] = {}
@@ -18,11 +19,13 @@ class GfsForecast():
     _gfs_pass: int
     _max_offset: int
     _data: dict[str, Any]
+    _zoneinfo: ZoneInfo
 
-    def __init__(self, logger: Logger, latitude: float, longitude: float, max_offset: int):
+    def __init__(self, logger: Logger, latitude: float, longitude: float, max_offset: int, zoneinfo: ZoneInfo):
         self.logger = logger
         self._latitude, self._longitude = latitude, longitude
         self._max_offset = max_offset
+        self._zoneinfo = zoneinfo
         self.find_latest_pass_info()
 
     def __get_url(self, gfs_date: date, gfs_pass: int, offset: int, inventory: bool = False) -> str:
@@ -292,14 +295,15 @@ class GfsForecast():
     def get_day_forecast(self) -> dict[str, Any]:
         forecast: dict[str, Any] = {}
         pass_datetime = datetime.fromisoformat(self._data['info']['date'])
-        pass_datetime = datetime(pass_datetime.year, pass_datetime.month, pass_datetime.day, self._data['info']['pass'], 0, 0, 0)
+        pass_datetime = datetime(pass_datetime.year, pass_datetime.month, pass_datetime.day, self._data['info']['pass'], 0, 0, 0, tzinfo=ZoneInfo('UTC'))
+        pass_datetime = pass_datetime.astimezone(tz=self._zoneinfo)
 
         for offset in self._data:
             if offset == 'info':
                 continue
             day_data = self._data[offset]
             dt = pass_datetime + timedelta(hours = int(offset))
-            key = dt.strftime('%Y-%m-%dT00:00:00+00:00')
+            key = dt.strftime('%Y-%m-%dT00:00:00%z')
             if key not in forecast:
                 forecast[key] = {
                     'chance_of_rain': 10,
@@ -343,5 +347,8 @@ class GfsForecast():
             forecast[forecast_date]['chance_of_rain'] = min(forecast[forecast_date]['chance_of_rain'], 90)
             forecast[forecast_date]['chance_of_rain'] = round(forecast[forecast_date]['chance_of_rain'], -1)
             forecast[forecast_date]['chance_of_sun'] = round(forecast[forecast_date]['chance_of_sun'], -1)
+            forecast[forecast_date].pop('vwind', None)
+            forecast[forecast_date].pop('uwind', None)
+            forecast[forecast_date]['rain'] /= 2 # the precipitation is an accumulation of the last 6 hours
             
         return forecast

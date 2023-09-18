@@ -29,14 +29,13 @@ logger.setLevel(log_levels[log_level])
 storage = Storage()
 hacoreapi = HACoreApi(api_token)
 latitude, longitude = hacoreapi.get_gps_position()
-gfs_forecast = GfsForecast(logger, latitude, longitude, max_offset)
+gfs_forecast = GfsForecast(logger, latitude, longitude, max_offset, hacoreapi.get_zone_info())
 
 while True:
     offset: int = 3
     step: int = 3
 
     if gfs_forecast.find_latest_pass_info():
-        # sensor.set_sensor_base_data(*gfs_forecast.get_date_and_pass())
         gfs_forecast.restore_data()
         data_found: bool = True
 
