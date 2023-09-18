@@ -1,5 +1,5 @@
 # About
-This add-on downloads the GFS weather forecast model data from the NOAA Nomads server and it produces a weather sensor via the GFS Weather Forecast integration under the device name "GFS Weather Forecast".
+This add-on downloads the GFS weather forecast model data from the NOAA Nomads server and it produces a weather sensor via the GFS Weather Forecast integration under the device name ["GFS Weather Forecast"](https://github.com/MarcoGos/gfs_weather_forecast).
 
 # Configuration
 
