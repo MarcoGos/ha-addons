@@ -5,6 +5,7 @@ from logger import logger, log_levels
 from gfsforecast import GfsForecast
 from hacoreapi import HACoreApi
 from storage import Storage
+from datetime import date
 import os
 
 log_level: str = 'info'
@@ -26,16 +27,20 @@ for opt, arg in opts:
 
 logger.setLevel(log_levels[log_level])
 
-storage = Storage()
+storage = Storage(max_offset)
 hacoreapi = HACoreApi(api_token)
 latitude, longitude = hacoreapi.get_gps_position()
 gfs_forecast = GfsForecast(logger, latitude, longitude, max_offset, hacoreapi.get_zone_info())
+gfs_date: date
+gfs_pass: int
 
 while True:
-    offset: int = 3
+    start_offset: int = 3
+    offset: int = start_offset
     step: int = 3
 
-    if gfs_forecast.find_latest_pass_info():
+    new_pass_found, gfs_date, gfs_pass = gfs_forecast.find_latest_pass_info()
+    if new_pass_found:
         gfs_forecast.restore_data()
         data_found: bool = True
 
@@ -43,9 +48,11 @@ while True:
             while (offset <= max_offset) & data_found:
                 if not gfs_forecast.offset_is_available(offset):
                     gfs_forecast.init_offset(offset)
-                    storage.store_status(*gfs_forecast.get_date_and_pass(), offset)
+                    storage.store_status(gfs_date, gfs_pass, offset)
 
                 if not gfs_forecast.is_offset_done(offset):
+                    if (offset == start_offset):
+                        logger.info(f'New pass found: {gfs_date} {gfs_pass}')
                     for key in MAPPING:
                         if not gfs_forecast.is_key_in_offset_done(offset, key):
                             value = gfs_forecast.get_value_from_grib_data(offset, key)
@@ -74,4 +81,6 @@ while True:
             logger.debug('No new GFS pass found (yet)...')
 
     logger.debug(f'Waiting {scan_interval} minutes to continue...')
+    if not gfs_forecast.is_done():
+        storage.store_status_waiting()
     time.sleep(scan_interval * 60)
