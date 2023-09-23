@@ -26,7 +26,6 @@ class GfsForecast():
         self._latitude, self._longitude = latitude, longitude
         self._max_offset = max_offset
         self._zoneinfo = zoneinfo
-        self.find_latest_pass_info()
 
     def __get_url(self, gfs_date: date, gfs_pass: int, offset: int, inventory: bool = False) -> str:
         url_tempate = 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{}/{}/atmos/gfs.t{}z.pgrb2.0p25.f{}'
@@ -202,13 +201,13 @@ class GfsForecast():
             return True
         return False
 
-    def find_latest_pass_info(self) -> bool:
+    def find_latest_pass_info(self) -> tuple[bool, date, int]:
         foundGfsDate = date.today()
         foundGfsPass = -1
         counter = 1
         while (counter >= 0) & (foundGfsPass == -1):
             for tryPass in [18, 12, 6, 0]:
-                url = self.__get_url(foundGfsDate, tryPass, self._max_offset)
+                url = self.__get_url(foundGfsDate, tryPass, 3)
                 try:
                     response = requests.head(url, timeout=10)
                     if response.ok:
@@ -216,7 +215,7 @@ class GfsForecast():
                         self._gfs_date = foundGfsDate
                         self._gfs_pass = foundGfsPass
                         self.logger.debug(f"Found {foundGfsDate} {foundGfsPass}")
-                        return True
+                        return True, foundGfsDate, foundGfsPass
                 except requests.exceptions.Timeout:
                     self.logger.warning('Got a timeout on getting the lastest pass info')
             counter -= 1
@@ -318,8 +317,8 @@ class GfsForecast():
                     'windangle': 0
                 }
 
+            forecast[key]['rain'] += day_data['rain']
             if (dt.hour >= 9) and (dt.hour <= 18):
-                forecast[key]['rain'] += day_data['rain']
                 forecast[key]['temperature_max'] = max(forecast[key]['temperature_max'], day_data['tmp'])
                 if dt.hour >= 9:
                     forecast[key]['min_temperature_daytime'] = min(forecast[key]['min_temperature_daytime'], day_data['tmp'])

@@ -2,7 +2,7 @@ name: "GFS Weather Forecast"
 description: >-
   This addon grabs the GFS weather forecast modal data from the NOAA NOMADS server. The addon works in conjunction with the GFS Weather Forecast integration
 url: https://github.com/MarcoGos/ha-addons
-version: "1.0.0"
+version: "1.0.1"
 slug: gfsweatherforecast
 arch:
   - aarch64

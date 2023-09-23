@@ -10,9 +10,10 @@ class Storage:
     _current: dict[str, Any] = {}
     _loading: dict[str, Any] = {}
     _gfs_pass: int
+    _max_offset: int
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, max_offset: int) -> None:
+        self._max_offset = max_offset
 
     def store_forecast(self, day_forecast: dict[str, Any]):
         filename = f'{store_directory}forecast.json'
@@ -24,11 +25,15 @@ class Storage:
         self._loading = {
             'date': gfs_date.isoformat(),
             'pass': gfs_pass,
-            'offset': offset
+            'offset': offset,
+            'progress': round(offset / self._max_offset * 100)
         }
         self._state = "Loading"
         self._store_status()
 
+    def store_status_waiting(self):
+        self._state = "Waiting"
+        self._store_status()
 
     def store_status_done(self, gfs_data: dict[str, Any]):
         self._loading = {}
@@ -37,13 +42,14 @@ class Storage:
             'pass': gfs_data['info']['pass']
         }
         self._state = "Finished"
-        self._used_latitude_longitude = f"{gfs_data['info']['used_latitude']}, {gfs_data['info']['used_longitude']}"
+        self._used_latitude_longitude = f"{gfs_data['info']['used_latitude']}; {gfs_data['info']['used_longitude']}"
         self._store_status()
 
     def _store_status(self):
         status_data: dict[str, Any] = {
             "status": self._state,
             "used_latitude_longitude": self._used_latitude_longitude,
+            "max_offset": self._max_offset,
             "current": self._current,
             "loading": self._loading
         }
