@@ -46,9 +46,9 @@ while True:
 
         if not gfs_forecast.is_done():
             while (offset <= max_offset) & data_found:
+                storage.store_status(gfs_date, gfs_pass, offset)
                 if not gfs_forecast.offset_is_available(offset):
                     gfs_forecast.init_offset(offset)
-                    storage.store_status(gfs_date, gfs_pass, offset)
 
                 if not gfs_forecast.is_offset_done(offset):
                     if (offset == start_offset):
@@ -60,22 +60,18 @@ while True:
                                 logger.debug(f'Offset={offset} {key}={value}')    
                                 gfs_forecast.store_data_value(offset, key, value)
                             else:
-                                logger.error(f'No data found for key {key} offset {offset}...')
                                 data_found = False
                                 break
                     if data_found:
                         gfs_forecast.set_offset_to_done(offset)
+                        offset += step
 
-                offset += step
-                if offset >= 120:
-                    step = 3
-
-            if (offset > max_offset):
+            if data_found and (offset > max_offset):
                 gfs_forecast.set_done()
                 storage.store_forecast(gfs_forecast.get_day_forecast())
                 storage.store_status_done(gfs_forecast.get_data())
                 
-            gfs_forecast.store_data()
+            gfs_forecast.store_data_to_file()
 
         else:
             logger.debug('No new GFS pass found (yet)...')

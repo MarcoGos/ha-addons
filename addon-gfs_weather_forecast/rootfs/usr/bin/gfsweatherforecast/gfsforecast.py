@@ -233,7 +233,7 @@ class GfsForecast():
     def __get_data_storage_path(self) -> str:
         return f'{store_directory}gfsdata.json'
 
-    def store_data(self):
+    def store_data_to_file(self):
         with open(self.__get_data_storage_path(), 'w') as file:
             json.dump(self._data, file)
 

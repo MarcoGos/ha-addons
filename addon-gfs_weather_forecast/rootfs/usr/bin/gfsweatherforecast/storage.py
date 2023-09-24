@@ -30,6 +30,7 @@ class Storage:
         }
         self._state = "Loading"
         self._store_status()
+        logger.debug(f'Stored status {gfs_date} {gfs_pass} {offset}')
 
     def store_status_waiting(self):
         self._state = "Waiting"
