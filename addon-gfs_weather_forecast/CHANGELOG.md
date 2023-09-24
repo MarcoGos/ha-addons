@@ -8,3 +8,7 @@
 ## 1.0.1
 
 - Added additional information for the integration.
+
+## 1.0.2
+
+- Bug fixes
