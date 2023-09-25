@@ -48,9 +48,6 @@ while True:
             if offset == start_offset:
                 logger.info(f'New pass found: {gfs_date} {gfs_pass}')
             while offset <= max_offset:
-                # if gfs_forecast.is_offset_done(offset):
-                #     offset += step
-                #     continue
                 if not gfs_forecast.offset_is_available(offset):
                     gfs_forecast.init_offset(offset)
                 storage.store_status(gfs_date, gfs_pass, offset)

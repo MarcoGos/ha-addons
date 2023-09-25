@@ -9,6 +9,6 @@
 
 - Added additional information for the integration.
 
-## 1.0.2
+## 1.0.2 and 1.0.3
 
 - Bug fixes
