@@ -319,9 +319,9 @@ class GfsForecast():
 
             forecast[key]['rain'] += day_data['rain']
             if (dt.hour >= 9) and (dt.hour <= 18):
-                forecast[key]['temperature_max'] = max(forecast[key]['temperature_max'], day_data['tmp'])
+                forecast[key]['temperature_max'] = max(forecast[key]['temperature_max'], day_data['tmax'])
                 if dt.hour >= 9:
-                    forecast[key]['min_temperature_daytime'] = min(forecast[key]['min_temperature_daytime'], day_data['tmp'])
+                    forecast[key]['min_temperature_daytime'] = min(forecast[key]['min_temperature_daytime'], day_data['tmax'])
                 if day_data['cldtotal'] >= 75:
                     forecast[key]['chance_of_sun'] -= 16 * day_data['cldtotal'] / 100
                 if forecast[key]['chance_of_sun'] == 90 and \
@@ -338,7 +338,7 @@ class GfsForecast():
                 windspeed,_ = utils.get_wind_info(day_data['vwind'], day_data['uwind'])
                 forecast[key]['windspeed'] = max(forecast[key]['windspeed'], windspeed)
             else:
-                forecast[key]['temperature_min'] = min(forecast[key]['temperature_min'], day_data['tmp'])
+                forecast[key]['temperature_min'] = min(forecast[key]['temperature_min'], day_data['tmin'])
 
         for forecast_date in forecast:
             _,windangle = utils.get_wind_info(forecast[forecast_date]['vwind'], forecast[forecast_date]['uwind'])
@@ -351,3 +351,14 @@ class GfsForecast():
             forecast[forecast_date]['rain'] /= 2 # the precipitation is an accumulation of the last 6 hours
             
         return forecast
+    
+    def is_key_needed(self, key: str, detailed: bool):
+        return not MAPPING[key].get('detailed', False) or detailed
+    
+    def get_last_offset(self, start_offset: int, max_offset: int, step: int) -> int:
+        offset = start_offset
+        while offset < max_offset:
+            if not self.is_offset_done(offset):
+                break
+            offset += step
+        return offset

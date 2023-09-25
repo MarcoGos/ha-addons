@@ -10,7 +10,6 @@ import os
 
 log_level: str = 'info'
 max_offset: int = 168
-detailed: bool = False
 api_token: str = os.environ['SUPERVISOR_TOKEN'] if 'SUPERVISOR_TOKEN' in os.environ else ''
 scan_interval: int = 5
 
@@ -39,44 +38,48 @@ while True:
     offset: int = start_offset
     step: int = 3
 
-    new_pass_found, gfs_date, gfs_pass = gfs_forecast.find_latest_pass_info()
-    if new_pass_found:
+    pass_found, gfs_date, gfs_pass = gfs_forecast.find_latest_pass_info()
+    if pass_found:
         gfs_forecast.restore_data()
-        data_found: bool = True
+        data_found: bool = False
 
         if not gfs_forecast.is_done():
-            while (offset <= max_offset) & data_found:
-                storage.store_status(gfs_date, gfs_pass, offset)
+            offset = gfs_forecast.get_last_offset(start_offset, max_offset, step)
+            if offset == start_offset:
+                logger.info(f'New pass found: {gfs_date} {gfs_pass}')
+            while offset <= max_offset:
+                # if gfs_forecast.is_offset_done(offset):
+                #     offset += step
+                #     continue
                 if not gfs_forecast.offset_is_available(offset):
                     gfs_forecast.init_offset(offset)
+                storage.store_status(gfs_date, gfs_pass, offset)
+                for key in MAPPING:
+                    if not gfs_forecast.is_key_in_offset_done(offset, key):
+                        value = gfs_forecast.get_value_from_grib_data(offset, key)
+                        if value != None:
+                            data_found = True
+                            logger.debug(f'Offset={offset} {key}={value}')    
+                            gfs_forecast.store_data_value(offset, key, value)
+                        else:
+                            data_found = False
+                            break
+                if data_found:
+                    gfs_forecast.set_offset_to_done(offset)
+                    gfs_forecast.store_data_to_file()
+                    offset += step
 
-                if not gfs_forecast.is_offset_done(offset):
-                    if (offset == start_offset):
-                        logger.info(f'New pass found: {gfs_date} {gfs_pass}')
-                    for key in MAPPING:
-                        if not gfs_forecast.is_key_in_offset_done(offset, key):
-                            value = gfs_forecast.get_value_from_grib_data(offset, key)
-                            if value != None:
-                                logger.debug(f'Offset={offset} {key}={value}')    
-                                gfs_forecast.store_data_value(offset, key, value)
-                            else:
-                                data_found = False
-                                break
-                    if data_found:
-                        gfs_forecast.set_offset_to_done(offset)
-                        offset += step
-
-            if data_found and (offset > max_offset):
-                gfs_forecast.set_done()
-                storage.store_forecast(gfs_forecast.get_day_forecast())
-                storage.store_status_done(gfs_forecast.get_data())
-                
-            gfs_forecast.store_data_to_file()
-
+            if data_found:
+                if offset > max_offset:
+                    gfs_forecast.set_done()
+                    gfs_forecast.store_data_to_file()
+                    storage.store_forecast(gfs_forecast.get_day_forecast())
+                    storage.store_status_done(gfs_forecast.get_data())                    
         else:
             logger.debug('No new GFS pass found (yet)...')
 
-    logger.debug(f'Waiting {scan_interval} minutes to continue...')
     if not gfs_forecast.is_done():
         storage.store_status_waiting()
+
+    logger.debug(f'Waiting {scan_interval} minutes to continue...')
     time.sleep(scan_interval * 60)
