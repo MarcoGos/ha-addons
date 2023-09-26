@@ -11,4 +11,8 @@
 
 ## 1.0.2 and 1.0.3
 
-- Bug fixes
+- Bug fixes.
+
+## 1.0.4
+
+- Fixed "Could not load inventory...302" error.

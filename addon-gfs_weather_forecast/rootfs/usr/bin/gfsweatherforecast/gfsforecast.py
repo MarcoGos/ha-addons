@@ -56,13 +56,12 @@ class GfsForecast():
             except requests.exceptions.Timeout:
                 self.logger.warning('Got a timeout when getting the inventory.')
 
-            if response.status_code != 200 | (len(response.content) < 20000):
+            if (response.status_code not in [200, 302]) | (len(response.content) < 20000):
                 time.sleep(2)
                 tries += 1
             else:
                 break
         if response.status_code != 200:
-            self.logger.error(f'Could not load inventory...{response.status_code}')
             return False
         inventory_raw = response.content.decode('utf-8').split('\n')
 
