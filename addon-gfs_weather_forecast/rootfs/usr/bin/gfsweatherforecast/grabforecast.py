@@ -9,9 +9,9 @@ from datetime import date
 import os
 
 log_level: str = 'info'
-max_offset: int = 168
+max_offset: int = 225
 api_token: str = os.environ['SUPERVISOR_TOKEN'] if 'SUPERVISOR_TOKEN' in os.environ else ''
-scan_interval: int = 5
+scan_interval: int = 10 # minutes
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "l:m:",["log_level=", "max_offset="])

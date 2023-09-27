@@ -6,4 +6,4 @@ docker run \
   --all \
   -t addon-gfs_weather_forecast \
   -r https://github.com/MarcoGos/ha-addons \
-  -b beta
+  -b master

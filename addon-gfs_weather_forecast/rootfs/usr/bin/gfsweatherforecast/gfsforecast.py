@@ -46,7 +46,7 @@ class GfsForecast():
             if not response.ok:
                 return False
         except requests.exceptions.Timeout:
-            self.logger.warning('Got a timeout getting info from the inventory.')
+            self.logger.debug('Got a timeout getting info about the inventory file.')
             return False
         
         tries = 0
@@ -54,10 +54,11 @@ class GfsForecast():
             try:
                 response = requests.get(url, timeout=10)
             except requests.exceptions.Timeout:
-                self.logger.warning('Got a timeout when getting the inventory.')
+                self.logger.debug('Got a timeout when getting the inventory file.')
 
-            if (response.status_code not in [200, 302]) | (len(response.content) < 20000):
-                time.sleep(2)
+            if (response.status_code not in [200, 302, 404]) | (len(response.content) < 20000):
+                self.logger.debug(f'Could not get the inventory file via url {url}')
+                time.sleep(60)
                 tries += 1
             else:
                 break
@@ -128,7 +129,7 @@ class GfsForecast():
                         file.write(response.content)
                     time.sleep(1)
                     return gribfile
-                time.sleep(5)
+                time.sleep(60)
                 tries += 1
             except:
                 pass
@@ -206,6 +207,9 @@ class GfsForecast():
         counter = 1
         while (counter >= 0) & (foundGfsPass == -1):
             for tryPass in [18, 12, 6, 0]:
+                if foundGfsDate == date.today() and tryPass > datetime.utcnow().hour:
+                    self.logger.debug(f"Skipping today's pass {tryPass}")
+                    continue
                 url = self.__get_url(foundGfsDate, tryPass, 3)
                 try:
                     response = requests.head(url, timeout=10)
@@ -213,7 +217,7 @@ class GfsForecast():
                         foundGfsPass = tryPass
                         self._gfs_date = foundGfsDate
                         self._gfs_pass = foundGfsPass
-                        self.logger.debug(f"Found {foundGfsDate} {foundGfsPass}")
+                        self.logger.debug(f"Found {foundGfsDate} pass {foundGfsPass}")
                         return True, foundGfsDate, foundGfsPass
                 except requests.exceptions.Timeout:
                     self.logger.warning('Got a timeout on getting the lastest pass info')

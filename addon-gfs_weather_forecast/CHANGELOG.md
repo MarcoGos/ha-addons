@@ -16,3 +16,7 @@
 ## 1.0.4
 
 - Fixed "Could not load inventory...302" error.
+
+## 1.0.5
+
+- Changes to comply to the user access policy of NWS NCEP.
