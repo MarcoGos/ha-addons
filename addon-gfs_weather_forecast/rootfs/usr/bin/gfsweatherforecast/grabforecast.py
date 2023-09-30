@@ -11,7 +11,7 @@ import os
 log_level: str = 'info'
 max_offset: int = 225
 api_token: str = os.environ['SUPERVISOR_TOKEN'] if 'SUPERVISOR_TOKEN' in os.environ else ''
-scan_interval: int = 10 # minutes
+scan_interval: int = 5 # minutes
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "l:m:",["log_level=", "max_offset="])
@@ -29,7 +29,7 @@ logger.setLevel(log_levels[log_level])
 storage = Storage(max_offset)
 hacoreapi = HACoreApi(api_token)
 latitude, longitude = hacoreapi.get_gps_position()
-gfs_forecast = GfsForecast(logger, latitude, longitude, max_offset, hacoreapi.get_zone_info())
+gfs_forecast = GfsForecast(logger, latitude, longitude, max_offset, hacoreapi.get_zone_info(), storage)
 gfs_date: date
 gfs_pass: int
 
@@ -48,6 +48,8 @@ while True:
             if offset == start_offset:
                 logger.info(f'New pass found: {gfs_date} {gfs_pass}')
             while offset <= max_offset:
+                if not gfs_forecast.get_inventory_by_offset(offset):
+                    break
                 if not gfs_forecast.offset_is_available(offset):
                     gfs_forecast.init_offset(offset)
                 storage.store_status(gfs_date, gfs_pass, offset)

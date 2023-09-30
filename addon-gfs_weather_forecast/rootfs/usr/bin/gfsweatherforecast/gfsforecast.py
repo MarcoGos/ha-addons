@@ -10,6 +10,7 @@ from logging import Logger
 import utils
 from const import store_directory
 from zoneinfo import ZoneInfo
+from storage import Storage
 
 class GfsForecast():
     _inventory: dict[str, Any] = {}
@@ -21,11 +22,12 @@ class GfsForecast():
     _data: dict[str, Any]
     _zoneinfo: ZoneInfo
 
-    def __init__(self, logger: Logger, latitude: float, longitude: float, max_offset: int, zoneinfo: ZoneInfo):
+    def __init__(self, logger: Logger, latitude: float, longitude: float, max_offset: int, zoneinfo: ZoneInfo, storage: Storage):
         self.logger = logger
         self._latitude, self._longitude = latitude, longitude
         self._max_offset = max_offset
         self._zoneinfo = zoneinfo
+        self._storage: Storage = storage
 
     def __get_url(self, gfs_date: date, gfs_pass: int, offset: int, inventory: bool = False) -> str:
         url_tempate = 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{}/{}/atmos/gfs.t{}z.pgrb2.0p25.f{}'
@@ -41,31 +43,25 @@ class GfsForecast():
 
     def __get_inventory_by_url(self, url: str) -> bool:
         self._inventory = {}
-        try:
-            response = requests.head(url, timeout=10)
-            if not response.ok:
-                return False
-        except requests.exceptions.Timeout:
-            self.logger.debug('Got a timeout getting info about the inventory file.')
-            return False
-        
         tries = 0
+        inventory_raw: list[str] = []
         while tries < 3:
             try:
                 response = requests.get(url, timeout=10)
+                if (response.status_code not in [200, 404]) | (len(response.content) < 20000):
+                    self.logger.debug(f'Could not get the inventory file via url {url}')
+                    self._storage.store_status_waiting()
+                    time.sleep(60)
+                    tries += 1
+                else:
+                    inventory_raw = response.content.decode('utf-8').split('\n')
+                    break
             except requests.exceptions.Timeout:
                 self.logger.debug('Got a timeout when getting the inventory file.')
 
-            if (response.status_code not in [200, 302, 404]) | (len(response.content) < 20000):
-                self.logger.debug(f'Could not get the inventory file via url {url}')
-                time.sleep(60)
-                tries += 1
-            else:
-                break
-        if response.status_code != 200:
+        if inventory_raw == []:
             return False
-        inventory_raw = response.content.decode('utf-8').split('\n')
-
+        
         offset = -1
         prevOffset = -1
         prevCode = ''
@@ -93,15 +89,17 @@ class GfsForecast():
         self.logger.debug(f'Downloaded inventory: {url}')
         return True
 
-    def __get_inventory_by_offset(self, new_offset: int) -> bool:
+    def get_inventory_by_offset(self, new_offset: int) -> bool:
         if self._gfs_pass == -1:
             self.find_latest_pass_info()
 
         if not self.__restore_inventory(new_offset):
+            self.logger.debug(f'Restoring inventory failed, start downloading inventory {new_offset}')
             url = self.__get_url_by_offset(new_offset, True)
             if self.__get_inventory_by_url(url):
                 self.__storeInventory(new_offset)
                 return True
+            self.logger.debug(f'Downloading inventory {new_offset} failed')
             return False
         else:
             return True
@@ -129,6 +127,7 @@ class GfsForecast():
                         file.write(response.content)
                     time.sleep(1)
                     return gribfile
+                self._storage.store_status_waiting()
                 time.sleep(60)
                 tries += 1
             except:
@@ -149,8 +148,6 @@ class GfsForecast():
         return value
 
     def get_value_from_grib_data(self, offset: int, key: str) -> Any:
-        if not self.__get_inventory_by_offset(offset):
-            return None
         if key in self._inventory:
             url = self.__get_url_by_offset(offset)
             invPart = self._inventory[key]
@@ -221,9 +218,11 @@ class GfsForecast():
                         return True, foundGfsDate, foundGfsPass
                 except requests.exceptions.Timeout:
                     self.logger.warning('Got a timeout on getting the lastest pass info')
+                    self._storage.store_status_waiting()
+                    break
             counter -= 1
             foundGfsDate += timedelta(days=-1)
-        return False
+        return False, foundGfsDate, foundGfsPass
 
     def init_offset(self, offset: int) -> None:
         self._data[f'{offset}'] = {}

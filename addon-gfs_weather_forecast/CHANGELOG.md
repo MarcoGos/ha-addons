@@ -20,3 +20,7 @@
 ## 1.0.5
 
 - Changes to comply to the user access policy of NWS NCEP.
+
+## 1.0.6
+
+- Fixed issue when inventory is not available.

@@ -3,7 +3,6 @@ import os.path
 from const import store_directory
 import json
 from typing import Any
-from logger import logger
 
 @get('/api/forecast')
 def forecast():
