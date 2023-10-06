@@ -50,14 +50,17 @@ class GfsForecast():
                 response = requests.get(url, timeout=10)
                 if (response.status_code not in [200, 404]) | (len(response.content) < 20000):
                     self.logger.debug(f'Could not get the inventory file via url {url}')
-                    self._storage.store_status_waiting()
-                    time.sleep(60)
-                    tries += 1
                 else:
                     inventory_raw = response.content.decode('utf-8').split('\n')
                     break
             except requests.exceptions.Timeout:
-                self.logger.debug('Got a timeout when getting the inventory file.')
+                self.logger.debug(f'Got a timeout on getting the inventory file {url}.')
+            except requests.exceptions.ConnectionError:
+                self.logger.debug(f'Got a connection error on getting the inventory file {url}.')
+
+            self._storage.store_status_waiting()
+            time.sleep(60)
+            tries += 1
 
         if inventory_raw == []:
             return False
@@ -127,11 +130,14 @@ class GfsForecast():
                         file.write(response.content)
                     time.sleep(1)
                     return gribfile
-                self._storage.store_status_waiting()
-                time.sleep(60)
-                tries += 1
-            except:
-                pass
+            except requests.exceptions.Timeout:
+                self.logger.debug(f'Got a timeout on getting part of the grib file {url}.')
+            except requests.exceptions.ConnectionError:
+                self.logger.debug(f'Got a connection error on getting part of the grib file {url}.')
+
+            self._storage.store_status_waiting()
+            time.sleep(60)
+            tries += 1
         return ''
 
     def __read_value(self, grib_file: str, correction: float) -> float:
