@@ -24,3 +24,7 @@
 ## 1.0.6
 
 - Fixed issue when inventory is not available.
+
+## 1.0.7
+
+- Better error handling on connection errors.
