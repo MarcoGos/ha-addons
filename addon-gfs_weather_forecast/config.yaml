@@ -23,4 +23,4 @@ ports:
   8000/tcp: 8000
 ports_description:
   8000/tcp: Port for API calls, used by the GFS weather forecast integration
-#image: "marcogos/{arch}-addon-gfs_weather_forecast"
+image: "marcogos/{arch}-addon-gfs_weather_forecast"
