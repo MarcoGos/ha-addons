@@ -28,3 +28,7 @@
 ## 1.0.7
 
 - Better error handling on connection errors.
+
+## 1.0.8
+
+- Improved error handling on broken grib parts.
