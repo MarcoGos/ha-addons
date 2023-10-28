@@ -32,3 +32,7 @@
 ## 1.0.8
 
 - Improved error handling on broken grib parts.
+
+## 1.0.9
+
+- Small fix on new forecast service.

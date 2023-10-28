@@ -2,7 +2,7 @@ name: "GFS Weather Forecast"
 description: >-
   This addon grabs the GFS weather forecast modal data from the NWS NCEP nomads server. The addon works in conjunction with the GFS Weather Forecast integration
 url: https://github.com/MarcoGos/addon-gfs_weather_forecast
-version: "1.0.8"
+version: "1.0.9"
 slug: gfsweatherforecast
 arch:
   - aarch64
