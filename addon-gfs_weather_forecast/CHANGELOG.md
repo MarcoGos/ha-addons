@@ -36,3 +36,7 @@
 ## 1.0.9
 
 - Small fix on new forecast service.
+
+## 1.0.10
+
+- Fixed small bug.
