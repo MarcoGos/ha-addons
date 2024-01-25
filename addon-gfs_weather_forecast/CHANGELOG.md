@@ -40,3 +40,7 @@
 ## 1.0.10
 
 - Fixed small bug.
+
+## 1.0.11
+
+- Added some raw innfo.
