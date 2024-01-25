@@ -44,3 +44,7 @@
 ## 1.0.11
 
 - Added some raw innfo.
+
+## 1.0.12
+
+- Added temperature on 500hPa to raw data.
