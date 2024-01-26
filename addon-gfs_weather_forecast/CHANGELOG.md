@@ -48,3 +48,7 @@
 ## 1.0.12
 
 - Added temperature on 500hPa to raw data.
+
+## 1.0.13
+
+- Remove support for armhf & i386.
