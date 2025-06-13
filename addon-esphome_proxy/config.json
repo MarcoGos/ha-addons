@@ -1,0 +1,35 @@
+{
+    "name": "ESPHome Proxy",
+    "version": "0.0.1",
+    "slug": "esphome_proxy",
+    "description": "Proxy for externally running ESPHome",
+    "arch": [
+      "aarch64",
+      "amd64",
+      "armhf",
+      "armv7",
+      "i386"
+    ],
+    "boot": "auto",
+    "init": true,
+    "true": true,
+    "ingress": true,
+    "timeout": 30,
+    "panel_icon": "mdi:chip",
+    "map": [
+      "config:ro"
+    ],
+    "ports": {
+      "8099/tcp": null
+    },
+    "ports_description": {
+      "8099/tcp": "Frontend tcp-listen port"
+    },
+    "options": {
+      "server": null
+    },
+    "schema": {
+      "server": "url"
+    },
+    "image": "marcogos/{arch}-addon-esphome"
+}
