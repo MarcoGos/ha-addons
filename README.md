@@ -15,9 +15,7 @@ The add-on is installed like any other:
 5. Configure at **Configuration** tab or separate file in [**Configuration folder**](https://www.home-assistant.io/getting-started/configuration/) according to the instructions of the selected add-on:
 
 - [GFS Weather Forecast](./addon-gfs_weather_forecast/)
-
-- [Vantage Pro to MQTT](./addon-vantagepro2mqtt) (DEPRECATED, use the Davis Vantage integration: https://github.com/MarcoGos/davis_vantage)
-- [GFS Forecast](./addon-gfsforecast) (DEPRECATED, use the GFS Weather Forecast addon)
+- [ESPHome Proxy](./addon-esphome_proxy/)
 
 6. Click <kbd>Start</kbd>, give it a few seconds to spin up.
 7. Enjoy.
