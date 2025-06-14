@@ -1,6 +1,6 @@
 {
     "name": "ESPHome Proxy",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "slug": "esphome_proxy",
     "description": "Proxy for externally running ESPHome",
     "arch": [
