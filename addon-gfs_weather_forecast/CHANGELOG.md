@@ -58,3 +58,7 @@
 - Added web interface on port 8081
   - Use http://homeassistant.local:8081/latest
   - Use http://homeassistant.local:8081/loading
+
+## 2.0.1
+
+- Fixed windspeed colors on web page
