@@ -52,3 +52,9 @@
 ## 1.0.13
 
 - Remove support for armhf & i386.
+
+## 2.0.0
+
+- Added web interface on port 8081
+  - Use http://homeassistant.local:8081/latest
+  - Use http://homeassistant.local:8081/loading
