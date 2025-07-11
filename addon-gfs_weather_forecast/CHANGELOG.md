@@ -62,3 +62,7 @@
 ## 2.0.1
 
 - Fixed windspeed colors on web page
+
+## 2.0.2
+
+- Optimized code
