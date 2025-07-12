@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.4
+
+- Disabled cache
+
 ## 2.0.3
 
 - Fixed dark mode
