@@ -66,3 +66,7 @@
 ## 2.0.2
 
 - Optimized code
+
+## 2.0.3
+
+- Fixed dark mode
