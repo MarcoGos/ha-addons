@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.6
+
+- Optimized code
+
 ## 2.0.5
 
 - Optimized unwanted caching of css
