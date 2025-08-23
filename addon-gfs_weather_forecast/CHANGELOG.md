@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.8
+
+- Small improvement of header color per day
+
 ## 2.0.7
 
 - Reverted latest code improvement
