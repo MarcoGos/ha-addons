@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.9
+
+- Fixed hour color in header
+
 ## 2.0.8
 
 - Small improvement of header color per day
