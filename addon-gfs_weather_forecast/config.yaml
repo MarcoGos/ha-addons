@@ -16,9 +16,11 @@ map:
 options:
   log_level: info
   max_offset: 225
+  language: en
 schema:
   log_level: list(debug|info|warning|error|fatal|critical)?
   max_offset: int(1,384)
+  language: list(en|nl)
 init: false
 ports:
   8000/tcp: 8000
