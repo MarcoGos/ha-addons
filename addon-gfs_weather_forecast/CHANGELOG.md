@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.10
+
+- Added Dutch language in web interface
+
 ## 2.0.9
 
 - Fixed hour color in header
