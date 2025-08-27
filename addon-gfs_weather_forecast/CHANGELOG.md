@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.11
+
+- Added localization support for dates
+
 ## 2.0.10
 
 - Added Dutch language in web interface
