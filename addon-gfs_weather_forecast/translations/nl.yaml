@@ -1,0 +1,10 @@
+configuration:
+  log_level:
+    name: Log niveau
+    description: Beheert het detailniveau van de log die de add-on levert.
+  max_offset:
+    name: Maximum offset
+    description: GFS wordt tot 384 uur vooruit berekend. De offset ligt tussen 1 en 384 uur.
+  language:
+    name: Taal
+    description: Taal voor de webinterface.
