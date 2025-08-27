@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.12
+
+- Added German translation
+
 ## 2.0.11
 
 - Added localization support for dates
