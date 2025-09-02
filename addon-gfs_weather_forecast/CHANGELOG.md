@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.13
+
+- Improved web page
+
 ## 2.0.12
 
 - Added German translation
