@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+
+- Changed to app_config folder
+
 ## 2.1.0
 
 - Removed the web part in favor for the gfs-weather-card
