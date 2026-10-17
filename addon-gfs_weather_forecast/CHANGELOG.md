@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+- Removed the web part in favor for the gfs-weather-card
+
 ## 2.0.13
 
 - Improved web page
