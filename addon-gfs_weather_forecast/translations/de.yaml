@@ -5,6 +5,3 @@ configuration:
   max_offset:
     name: Maximale Verschiebung
     description: GFS wird bis zu 384 Stunden im Voraus berechnet. Die Verschiebung liegt zwischen 1 und 384 Stunden.
-  language:
-    name: Sprache
-    description: Sprache für die

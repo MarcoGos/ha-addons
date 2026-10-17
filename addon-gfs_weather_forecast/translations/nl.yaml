@@ -5,6 +5,3 @@ configuration:
   max_offset:
     name: Maximum offset
     description: GFS wordt tot 384 uur vooruit berekend. De offset ligt tussen 1 en 384 uur.
-  language:
-    name: Taal
-    description: Taal voor de webinterface.
