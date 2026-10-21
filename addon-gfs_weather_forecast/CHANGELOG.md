@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2
+
+- Upgraded build actions
+
 ## 2.1.1
 
 - Changed to app_config folder
