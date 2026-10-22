@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.3
+
+- Save current date and pass when app state is loading or waiting
+
 ## 2.1.2
 
 - Upgraded build actions
